@@ -1,0 +1,13 @@
+{
+  "name": "aiemployee-vn",
+  "version": "1.0.0",
+  "description": "AIEmployee.vn landing page and API",
+  "scripts": {
+    "test": "python .github/workflows/validate_html.py products/aiemployee-vn/index.html && python .github/workflows/check_links.py products/aiemployee-vn/index.html",
+    "lint": "echo 'No linter configured for static HTML'",
+    "serve": "python -m http.server 8080 --directory products/aiemployee-vn"
+  },
+  "devDependencies": {},
+  "keywords": ["aiemployee", "landing-page"],
+  "author": "Company OS Team"
+}

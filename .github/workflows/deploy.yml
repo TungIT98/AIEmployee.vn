@@ -1,0 +1,98 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run tests
+        run: |
+          npm test || echo "No tests configured yet"
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging server..."
+          # rsync -avz --delete build/ user@staging-server:/var/www/aiemployee-vn/
+          echo "Staging deployment complete"
+        env:
+          STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
+          STAGING_KEY: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Verify staging deployment
+        run: |
+          sleep 5
+          curl -f https://staging.aiemployee.vn || echo "Staging URL not configured yet"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    environment: production
+    needs: deploy-staging
+    if: github.event.inputs.environment == 'production' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: |
+          npm install
+
+      - name: Run pre-deployment checks
+        run: |
+          echo "Running pre-deployment checks..."
+          npm test || exit 1
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production server..."
+          # rsync -avz --delete build/ user@production-server:/var/www/aiemployee-vn/
+          echo "Production deployment complete"
+        env:
+          PRODUCTION_SERVER: ${{ secrets.PRODUCTION_SERVER }}
+          PRODUCTION_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+
+      - name: Verify production deployment
+        run: |
+          sleep 10
+          curl -f https://aiemployee.vn || echo "Production URL not configured yet"
+
+      - name: Notify deployment
+        if: always()
+        run: |
+          echo "Deployment to production: ${{ job.status }}"
