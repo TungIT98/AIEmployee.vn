@@ -62,9 +62,9 @@ jobs:
 
       - name: Extract and lint inline JS
         run: |
-          grep -oP '(?<=<script>)[\s\S]*?(?=</script>)' products/aiemployee-vn/index.html > temp.js
+          sed -n '/<script>/,/<\/script>/p' products/aiemployee-vn/index.html | sed '1d;$d' > temp.js
           eslint temp.js --no-eslintrc --env browser,es2021
-          rm temp.js
+          rm -f temp.js
 
   api-tests:
     name: API integration tests
