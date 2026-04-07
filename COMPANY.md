@@ -57,6 +57,16 @@ FOUNDER (Human)
 - Heartbeat: Built-in (5 min interval)
 - Approval: Board Operator (Human User) approval for key decisions
 
+## Documentation
+
+| Document | Description |
+|----------|-------------|
+| [API Reference](docs/API.md) | Complete API endpoint documentation |
+| [Quick Start Guide](docs/QUICKSTART.md) | Get started in 5 minutes |
+| [Deployment Guide](docs/DEPLOYMENT.md) | Production deployment instructions |
+| [SPEC.md](SPEC.md) | System specification |
+| [ROLES.md](ROLES.md) | Agent role definitions |
+
 ## Current Status
 - **COM-9:** APPROVED ✅ (Company OS Platform - Phase 1)
 - **Team:** 14 agents hired and approved

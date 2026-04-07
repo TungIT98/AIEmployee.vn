@@ -1,0 +1,39 @@
+version: '3.8'
+
+# US West 2 Region Override
+# Usage: docker-compose -f docker-compose.global.yml -f docker-compose.us-west-2.yml up -d
+
+services:
+  api-gateway:
+    container_name: global-api-gateway-us-west-2
+    environment:
+      - REGION=us-west-2
+      - ELASTICSEARCH_URL=http://elasticsearch-replica:9200
+    ports:
+      - "3001:3000"
+    deploy:
+      replicas: 2
+
+  elasticsearch-master:
+    container_name: es-master-us-west-2
+    environment:
+      - node.name=master-us-west-2
+    ports:
+      - "9202:9200"
+      - "9302:9300"
+    volumes:
+      - es-master-uswest-data:/usr/share/elasticsearch/data
+
+  elasticsearch-replica:
+    container_name: es-replica-us-west-2
+    environment:
+      - node.name=replica-us-west-2
+      - "ES_REMOTING_URL=http://elasticsearch-master:9200"
+    ports:
+      - "9203:9200"
+    volumes:
+      - es-replica-uswest-data:/usr/share/elasticsearch/data
+
+volumes:
+  es-master-uswest-data:
+  es-replica-uswest-data:

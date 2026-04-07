@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIEmployee.vn - Nhân viên AI cho doanh nghiệp Việt</title>
+    <title>Thuê Nhân Viên Ảo AI Cho Doanh Nghiệp | AIEmployee.vn</title>
+    <meta name="description" content="AIEmployee.vn - Dịch vụ thuê nhân viên ảo AI chuyên nghiệp cho doanh nghiệp Việt Nam. Hoạt động 24/7, tiết kiệm 80% chi phí so với nhân sự truyền thống.">
+    <meta name="keywords" content="nhân viên ảo AI, thuê nhân viên ảo, AI nhân viên, agent AI cho doanh nghiệp, nhân viên ảo việt nam">
+    <meta property="og:title" content="Thuê Nhân Viên Ảo AI Cho Doanh Nghiệp | AIEmployee.vn">
+    <meta property="og:description" content="AIEmployee.vn - Dịch vụ thuê nhân viên ảo AI chuyên nghiệp cho doanh nghiệp Việt Nam.">
+    <meta property="og:type" content="website">
+    <meta property="og:locale" content="vi_VN">
+    <link rel="canonical" href="https://aiemployee.vn/">
     <style>
         * {
             margin: 0;
@@ -107,6 +114,11 @@
         .btn-outline:hover {
             background: var(--primary);
             color: var(--white);
+        }
+
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
         }
 
         /* Hero Section */
@@ -432,10 +444,10 @@
     <section class="hero">
         <div class="container">
             <div class="hero-content">
-                <h1>Nhân viên AI <span>24/7</span> cho doanh nghiệp Việt</h1>
-                <p>Siêu nhân viên AI hoạt động liên tục, xử lý công việc nhanh hơn 10x, chi phí thấp hơn 80% so với nhân sự truyền thống.</p>
+                <h1>Thuê <span>Nhân Viên Ảo AI</span> Cho Doanh Nghiệp Việt</h1>
+                <p>Siêu nhân viên AI hoạt động liên tục 24/7, xử lý công việc nhanh hơn 10x, chi phí thấp hơn 80% so với nhân sự truyền thống. Agent AI cho doanh nghiệp hiệu quả.</p>
                 <div class="hero-buttons">
-                    <a href="#contact" class="btn btn-primary">Bắt đầu miễn phí</a>
+                    <a href="#contact" class="btn btn-primary">Dùng thử miễn phí</a>
                     <a href="#features" class="btn btn-outline">Tìm hiểu thêm</a>
                 </div>
             </div>
@@ -446,19 +458,19 @@
     <section class="value-props" id="features">
         <div class="container">
             <div class="section-title">
-                <h2>Tại sao chọn AIEmployee?</h2>
-                <p>Giải pháp AI tối ưu cho doanh nghiệp Việt Nam</p>
+                <h2>Tại sao chọn AIEmployee.vn - Agent AI cho doanh nghiệp?</h2>
+                <p>Giải pháp nhân viên ảo AI tối ưu cho doanh nghiệp Việt Nam</p>
             </div>
             <div class="props-grid">
                 <div class="prop-card">
                     <div class="prop-icon">⚡</div>
                     <h3>Tốc độ siêu nhanh</h3>
-                    <p>Xử lý công việc nhanh hơn 10 lần so với nhân viên thường. Không cần nghỉ ngơi, không cần chờ đợi.</p>
+                    <p>Xử lý công việc nhanh hơn 10 lần so với nhân viên thường. Không cần nghỉ ngơi, không cần chờ đợi. Nhân viên ảo AI hoạt động 24/7.</p>
                 </div>
                 <div class="prop-card">
                     <div class="prop-icon">💰</div>
                     <h3>Tiết kiệm 80% chi phí</h3>
-                    <p>Chỉ với 199.000đ/tháng có ngay nhân viên AI làm việc 24/7. Không tăng lương, không phúc lợi.</p>
+                    <p>Chỉ với 199.000đ/tháng có ngay nhân viên ảo AI làm việc liên tục. Không tăng lương, không phúc lợi. Thuê nhân viên ảo tiết kiệm.</p>
                 </div>
                 <div class="prop-card">
                     <div class="prop-icon">🧠</div>
@@ -587,17 +599,50 @@
     </footer>
 
     <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
+        const API_BASE = 'http://localhost:3000/api';
+
+        // Form submission handler
+        document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
 
-            console.log('Form submitted:', data);
+            // Show loading state
+            submitBtn.textContent = 'Đang gửi...';
+            submitBtn.disabled = true;
+            submitBtn.classList.add('loading');
 
-            // Hide form and show success message
-            this.style.display = 'none';
-            document.getElementById('formSuccess').style.display = 'block';
+            try {
+                const response = await fetch(`${API_BASE}/contacts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // Success - hide form and show success message
+                    this.style.display = 'none';
+                    document.getElementById('formSuccess').style.display = 'block';
+                } else {
+                    // Server error - show error message
+                    alert(result.error || 'Có lỗi xảy ra. Vui lòng thử lại.');
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            } catch (error) {
+                // Network error - API not available
+                console.error('API Error:', error);
+                alert('Không thể kết nối đến server. Vui lòng đảm bảo backend API đang chạy.');
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
         // Smooth scroll for anchor links

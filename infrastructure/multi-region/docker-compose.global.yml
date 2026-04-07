@@ -1,0 +1,216 @@
+version: '3.8'
+
+# Multi-Region Global Deployment Compose File
+# This file defines the global service topology across regions
+#
+# Usage:
+#   docker-compose -f docker-compose.global.yml up -d
+#   Region-specific overrides: docker-compose -f docker-compose.global.yml -f docker-compose.us-west-2.yml up -d
+
+services:
+  # ============================================
+  # Global API Gateway (Primary Region)
+  # ============================================
+  api-gateway:
+    image: ${IMAGE_REGISTRY}/aiemployee-api:${VERSION:-latest}
+    container_name: global-api-gateway
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - REGION=us-east-1
+      - ELASTICSEARCH_URL=http://elasticsearch-master:9200
+      - LOG_LEVEL=info
+      - CDN_ENABLED=true
+      - CDN_PROVIDER=${CDN_PROVIDER:-cloudflare}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    depends_on:
+      elasticsearch-master:
+        condition: service_healthy
+    networks:
+      - global-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 2G
+
+  # ============================================
+  # Elasticsearch Master (Primary Region)
+  # ============================================
+  elasticsearch-master:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: es-master
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=true
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - cluster.name=aiemployee-global
+      - node.name=master-us-east-1
+      - bootstrap.memory_lock=true
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - es-master-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s https://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - global-network
+    mem_limit: 2g
+
+  # ============================================
+  # Elasticsearch Replica (Secondary Region)
+  # ============================================
+  elasticsearch-replica:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: es-replica
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=true
+      - xpack.security.enrollment.enabled=true
+      - ELASTIC_PASSWORD=${ES_PASSWORD}
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - cluster.name=aiemployee-global
+      - node.name=replica-us-west-2
+      - bootstrap.memory_lock=true
+      - "ES_REMOTING_URL=https://elasticsearch-master:9200"
+    ports:
+      - "9201:9200"
+      - "9301:9300"
+    volumes:
+      - es-replica-data:/usr/share/elasticsearch/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s https://localhost:9200/_cluster/health | grep -q '\"status\":\"green\"\\|\"status\":\"yellow\"'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - global-network
+    mem_limit: 2g
+    depends_on:
+      - elasticsearch-master
+
+  # ============================================
+  # Global Logstash (Centralized Logging)
+  # ============================================
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.12.0
+    container_name: global-logstash
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    environment:
+      - "LS_JAVA_OPTS=-Xms512m -Xmx512m"
+      - XPACK_MONITORING_ENABLED=true
+      - XPACK_MONITORING_ELASTICSEARCH_HOSTS=https://elasticsearch-master:9200
+    volumes:
+      - ./elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./elk/logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+    depends_on:
+      elasticsearch-master:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - global-network
+
+  # ============================================
+  # Global Kibana (Monitoring Dashboard)
+  # ============================================
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: global-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=https://elasticsearch-master:9200
+      - XPACK_SECURITY_ENABLED=true
+      - ELASTICSEARCH_USERNAME=elastic
+      - ELASTICSEARCH_PASSWORD=${ES_PASSWORD}
+    volumes:
+      - ./elk/kibana/dashboards:/usr/share/kibana/dashboards:ro
+    depends_on:
+      elasticsearch-master:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - global-network
+
+  # ============================================
+  # CDN Cache Purge Service
+  # ============================================
+  cdn-purger:
+    image: ${IMAGE_REGISTRY}/aiemployee-cdn-purger:${VERSION:-latest}
+    container_name: cdn-purger
+    environment:
+      - CDN_PROVIDER=${CDN_PROVIDER:-cloudflare}
+      - CDN_ZONE_ID=${CDN_ZONE_ID}
+      - CDN_API_TOKEN=${CDN_API_TOKEN}
+    restart: unless-stopped
+    networks:
+      - global-network
+
+  # ============================================
+  # Backup Agent (3-2-1 Backup Strategy)
+  # ============================================
+  backup-agent:
+    image: ${IMAGE_REGISTRY}/aiemployee-backup:${VERSION:-latest}
+    container_name: backup-agent
+    environment:
+      - BACKUP_PROVIDER=${BACKUP_PROVIDER:-s3}
+      - BACKUP_REGION=${BACKUP_REGION:-us-east-1}
+      - BACKUP_BUCKET=${BACKUP_BUCKET}
+      - ES_HOST=https://elasticsearch-master:9200
+      - ES_USER=elastic
+      - ES_PASSWORD=${ES_PASSWORD}
+    volumes:
+      - ./backup/config:/config:ro
+      - ./backup/scripts:/scripts:ro
+    restart: unless-stopped
+    networks:
+      - global-network
+
+  # ============================================
+  # Health Monitor Agent
+  # ============================================
+  health-monitor:
+    image: ${IMAGE_REGISTRY}/aiemployee-health-monitor:${VERSION:-latest}
+    container_name: health-monitor
+    environment:
+      - REGION=us-east-1
+      - CHECK_INTERVAL=30s
+      - FAILOVER_THRESHOLD=3
+      - API_ENDPOINT=http://api-gateway:3000/health
+      - ES_ENDPOINT=https://elasticsearch-master:9200
+      - ES_USERNAME=elastic
+      - ES_PASSWORD=${ES_PASSWORD}
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - global-network
+
+volumes:
+  es-master-data:
+    driver: local
+  es-replica-data:
+    driver: local
+
+networks:
+  global-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

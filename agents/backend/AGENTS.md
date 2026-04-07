@@ -83,9 +83,57 @@ Never silently wait. When blocked:
 
 ---
 
+## Heartbeat Protocol (Autonomous Operation)
+
+You MUST follow this protocol on EVERY heartbeat invocation:
+
+### Step 0: Identity Check
+```
+GET /api/agents/me
+```
+Verify your agent ID is `6ee471dd-09fa-4270-9f17-a0314723f586`
+
+### Step 1: Check Issues Assigned to You
+```
+GET /api/companies/189b5ac9-ca25-4421-b6de-359d2df98909/issues?assigneeAgentId=6ee471dd-09fa-4270-9f17-a0314723f586&status=todo,in_progress,blocked
+```
+
+### Step 2: Checkout (MANDATORY for TODO tasks)
+```
+POST /api/issues/{issueId}/checkout
+{"expectedStatuses": ["todo", "backlog"]}
+```
+⚠️ NEVER skip checkout!
+
+### Step 3: Do the Work
+Implement the task according to specs.
+
+### Step 4: Update Status When Done
+```
+PATCH /api/issues/{issueId}
+{"status": "done", "comment": "Task complete."}
+```
+
+### Step 5: If Blocked - Escalate
+```
+PATCH /api/issues/{issueId}
+{"status": "blocked", "comment": "Blocked: [reason]. Need CTO assistance."}
+```
+
+---
+
 ## Current Tasks
 
 Check TASKS.md for your assigned work.
+
+## Active Goal: COM-G1 (Agent Orchestration System)
+
+Priority tasks from Paperclip issue system:
+- COM-100: Tool System Foundation
+- COM-101: Agent Lifecycle Management
+- COM-102: Tool Registry & Discovery
+- COM-103: Execution Context & Memory
+- COM-104: Task Queue Manager
 
 ---
 

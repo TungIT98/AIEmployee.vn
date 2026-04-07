@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tải lên hóa đơn | AIEmployee.vn</title>
+    <link rel="canonical" href="https://aiemployee.vn/invoice-upload">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        nav {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--dark);
+        }
+
+        .back-link {
+            color: var(--gray);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        /* Page Title */
+        .page-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: var(--gray);
+            font-size: 16px;
+        }
+
+        /* Upload Card */
+        .upload-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .dropzone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 60px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: var(--light);
+        }
+
+        .dropzone:hover,
+        .dropzone.dragover {
+            border-color: var(--primary);
+            background: #eff6ff;
+        }
+
+        .dropzone.uploading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .dropzone-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+        }
+
+        .dropzone h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+
+        .dropzone p {
+            color: var(--gray);
+            margin-bottom: 16px;
+        }
+
+        .dropzone .browse-btn {
+            display: inline-block;
+            padding: 10px 24px;
+            background: var(--primary);
+            color: var(--white);
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .dropzone .browse-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Image Preview */
+        .preview-section {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .preview-header h3 {
+            font-size: 18px;
+        }
+
+        .remove-btn {
+            padding: 8px 16px;
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .remove-btn:hover {
+            background: #dc2626;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* OCR Progress */
+        .ocr-progress {
+            display: none;
+            margin-top: 32px;
+            padding: 24px;
+            background: var(--light);
+            border-radius: 12px;
+        }
+
+        .ocr-progress.active {
+            display: block;
+        }
+
+        .ocr-progress h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .progress-bar-container {
+            background: var(--border);
+            border-radius: 8px;
+            height: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-status {
+            color: var(--gray);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Extracted Data Form */
+        .extracted-data {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .extracted-data.active {
+            display: block;
+        }
+
+        .extracted-data h3 {
+            font-size: 18px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--secondary);
+        }
+
+        .form-section {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .form-section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group input.editable {
+            background: var(--white);
+        }
+
+        .form-group input.readonly {
+            background: #f1f5f9;
+            color: var(--gray);
+        }
+
+        .form-group .confidence-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+
+        .confidence-high {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .confidence-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .confidence-low {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        .items-table th,
+        .items-table td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .items-table th {
+            background: var(--light);
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .items-table td {
+            font-size: 14px;
+        }
+
+        .items-table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .items-table input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .remove-item-btn {
+            background: var(--danger);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--light);
+        }
+
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        /* Success State */
+        .success-state {
+            display: none;
+            text-align: center;
+            padding: 60px 40px;
+        }
+
+        .success-state.active {
+            display: block;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--secondary), #059669);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 24px;
+        }
+
+        .success-state h2 {
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: var(--secondary);
+        }
+
+        .success-state p {
+            color: var(--gray);
+            margin-bottom: 24px;
+        }
+
+        .invoice-number {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--light);
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 32px;
+        }
+
+        /* Error State */
+        .error-message {
+            display: none;
+            padding: 16px;
+            background: #fee2e2;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            color: #991b1b;
+            margin-top: 16px;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-overlay .spinner {
+            width: 40px;
+            height: 40px;
+            border-width: 3px;
+            margin-bottom: 16px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .upload-card {
+                padding: 24px;
+            }
+
+            .dropzone {
+                padding: 40px 20px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .items-table {
+                font-size: 12px;
+            }
+
+            .items-table th,
+            .items-table td {
+                padding: 6px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">AI<span>Employee</span>.vn</a>
+            <a href="index.html" class="back-link">
+                <span>←</span> Quay lại trang chủ
+            </a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Tải lên hóa đơn</h1>
+            <p>Tải lên hình ảnh hóa đơn để trích xuất thông tin tự động bằng OCR</p>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="upload-card" id="uploadCard">
+            <div class="dropzone" id="dropzone">
+                <div class="dropzone-icon">📄</div>
+                <h3>Kéo thả file hóa đơn vào đây</h3>
+                <p>hoặc nhấp để chọn file từ máy tính</p>
+                <div class="browse-btn">Chọn file</div>
+                <p style="margin-top: 16px; font-size: 13px; color: #94a3b8;">Hỗ trợ: JPG, PNG, PDF (tối đa 10MB)</p>
+                <input type="file" id="fileInput" class="file-input" accept="image/jpeg,image/png,application/pdf">
+            </div>
+
+            <!-- Image Preview -->
+            <div class="preview-section" id="previewSection">
+                <div class="preview-header">
+                    <h3>Hình ảnh hóa đơn</h3>
+                    <button class="remove-btn" id="removeBtn">✕ Xóa</button>
+                </div>
+                <img id="imagePreview" class="image-preview" alt="Hóa đơn">
+            </div>
+
+            <!-- OCR Progress -->
+            <div class="ocr-progress" id="ocrProgress">
+                <h3><span class="spinner"></span> Đang xử lý OCR...</h3>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <p class="progress-status" id="progressStatus">Đang tải hình ảnh lên...</p>
+            </div>
+
+            <!-- Extracted Data Form -->
+            <div class="extracted-data" id="extractedData">
+                <h3>✓ Thông tin trích xuất từ hóa đơn</h3>
+                <p style="margin-bottom: 16px; color: var(--gray); font-size: 14px;">Vui lòng kiểm tra và chỉnh sửa thông tin trước khi tạo hóa đơn</p>
+
+                <!-- Seller Info -->
+                <div class="form-section">
+                    <div class="form-section-title">Thông tin người bán</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mã số thuế (Seller)</label>
+                            <input type="text" id="sellerTaxCode" class="editable" placeholder="0123456789">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên công ty (Seller)</label>
+                            <input type="text" id="sellerName" class="editable" placeholder="Công ty ABC">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>Địa chỉ (Seller)</label>
+                            <input type="text" id="sellerAddress" class="editable" placeholder="123 Nguyễn Trãi, Quận 1, TP.HCM">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buyer Info -->
+                <div class="form-section">
+                    <div class="form-section-title">Thông tin người mua</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Mã số thuế (Buyer)</label>
+                            <input type="text" id="buyerTaxCode" class="editable" placeholder="9876543210">
+                        </div>
+                        <div class="form-group">
+                            <label>Tên công ty (Buyer)</label>
+                            <input type="text" id="buyerName" class="editable" placeholder="Công ty XYZ">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group full-width">
+                            <label>Địa chỉ (Buyer)</label>
+                            <input type="text" id="buyerAddress" class="editable" placeholder="456 Lê Lợi, Quận 1, TP.HCM">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invoice Items -->
+                <div class="form-section">
+                    <div class="form-section-title">Chi tiết hóa đơn</div>
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 40%;">Mô tả</th>
+                                <th style="width: 15%;">Số lượng</th>
+                                <th style="width: 20%;">Đơn giá (VND)</th>
+                                <th style="width: 10%;">VAT (%)</th>
+                                <th style="width: 15%;">Thành tiền</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <tr>
+                                <td><input type="text" id="itemDesc0" placeholder="Mô tả sản phẩm/dịch vụ"></td>
+                                <td><input type="number" id="itemQty0" value="1" min="1"></td>
+                                <td><input type="number" id="itemPrice0" placeholder="0"></td>
+                                <td>
+                                    <select id="itemVat0">
+                                        <option value="0">0%</option>
+                                        <option value="5">5%</option>
+                                        <option value="8">8%</option>
+                                        <option value="10" selected>10%</option>
+                                    </select>
+                                </td>
+                                <td><span id="itemTotal0">0</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <button type="button" id="addItemBtn" style="margin-top: 12px; padding: 8px 16px; background: var(--light); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 14px;">+ Thêm dòng</button>
+                </div>
+
+                <!-- Invoice Summary -->
+                <div class="form-section">
+                    <div class="form-section-title">Tổng kết</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phương thức thanh toán</label>
+                            <select id="paymentMethod">
+                                <option value="TM">Tiền mặt (TM)</option>
+                                <option value="CK" selected>Chuyển khoản (CK)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Hạn thanh toán</label>
+                            <input type="date" id="dueDate" class="editable">
+                        </div>
+                    </div>
+                    <div class="form-row" style="background: var(--white); padding: 16px; border-radius: 8px; margin-top: 16px;">
+                        <div class="form-group">
+                            <label>Tổng tiền (net)</label>
+                            <input type="text" id="netTotal" class="readonly" readonly value="0 VND">
+                        </div>
+                        <div class="form-group">
+                            <label>Thuế VAT</label>
+                            <input type="text" id="vatTotal" class="readonly" readonly value="0 VND">
+                        </div>
+                        <div class="form-group full-width">
+                            <label style="font-size: 18px; color: var(--primary);">Tổng cộng (VND)</label>
+                            <input type="text" id="grandTotal" class="readonly" readonly value="0 VND" style="font-size: 24px; font-weight: 700; color: var(--primary);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-secondary" id="resetBtn">↺ Tải lại ảnh khác</button>
+                    <button type="button" class="btn btn-primary" id="submitBtn">✓ Tạo hóa đơn</button>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+        </div>
+
+        <!-- Success State -->
+        <div class="success-state" id="successState">
+            <div class="success-icon">✓</div>
+            <h2>Hóa đơn đã được tạo!</h2>
+            <p>Hóa đơn điện tử của bạn đã được tạo và gửi thành công.</p>
+            <div class="invoice-number" id="invoiceNumber">AE/26/0402/000001</div>
+            <div class="action-buttons" style="justify-content: center;">
+                <button type="button" class="btn btn-primary" id="newInvoiceBtn">+ Tạo hóa đơn mới</button>
+                <button type="button" class="btn btn-secondary" id="viewInvoiceBtn">Xem chi tiết</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p style="color: var(--gray);">Đang gửi hóa đơn...</p>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:3000/api';
+
+        // DOM Elements
+        const dropzone = document.getElementById('dropzone');
+        const fileInput = document.getElementById('fileInput');
+        const previewSection = document.getElementById('previewSection');
+        const imagePreview = document.getElementById('imagePreview');
+        const removeBtn = document.getElementById('removeBtn');
+        const ocrProgress = document.getElementById('ocrProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressStatus = document.getElementById('progressStatus');
+        const extractedData = document.getElementById('extractedData');
+        const successState = document.getElementById('successState');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // State
+        let currentFile = null;
+        let itemCount = 1;
+
+        // Initialize
+        function init() {
+            setupDropzone();
+            setupFormListeners();
+            setupAddItemButton();
+            setupSubmitButton();
+            setupResetButton();
+        }
+
+        // Dropzone handling
+        function setupDropzone() {
+            dropzone.addEventListener('click', () => fileInput.click());
+
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            });
+
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.classList.remove('dragover');
+            });
+
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFile(e.target.files[0]);
+                }
+            });
+
+            removeBtn.addEventListener('click', resetUpload);
+        }
+
+        function handleFile(file) {
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+            if (!validTypes.includes(file.type)) {
+                showError('Vui lòng chọn file JPG, PNG hoặc PDF');
+                return;
+            }
+
+            // Validate file size (10MB max)
+            if (file.size > 10 * 1024 * 1024) {
+                showError('File quá lớn. Vui lòng chọn file nhỏ hơn 10MB');
+                return;
+            }
+
+            currentFile = file;
+            hideError();
+
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                previewSection.classList.add('active');
+                dropzone.style.display = 'none';
+
+                // Start OCR simulation
+                simulateOCR();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetUpload() {
+            currentFile = null;
+            fileInput.value = '';
+            previewSection.classList.remove('active');
+            ocrProgress.classList.remove('active');
+            extractedData.classList.remove('active');
+            successState.classList.remove('active');
+            dropzone.style.display = 'block';
+            dropzone.classList.remove('uploading');
+            clearForm();
+        }
+
+        // OCR Simulation
+        function simulateOCR() {
+            ocrProgress.classList.add('active');
+            extractedData.classList.remove('active');
+            dropzone.classList.add('uploading');
+
+            const steps = [
+                { progress: 20, status: 'Đang tải hình ảnh lên...' },
+                { progress: 45, status: 'Đang phân tích nội dung...' },
+                { progress: 75, status: 'Đang trích xuất thông tin...' },
+                { progress: 100, status: 'Hoàn tất!' }
+            ];
+
+            let stepIndex = 0;
+
+            const interval = setInterval(() => {
+                if (stepIndex < steps.length) {
+                    progressBar.style.width = steps[stepIndex].progress + '%';
+                    progressStatus.textContent = steps[stepIndex].status;
+                    stepIndex++;
+                } else {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        ocrProgress.classList.remove('active');
+                        dropzone.classList.remove('uploading');
+                        populateMockData();
+                        extractedData.classList.add('active');
+                    }, 300);
+                }
+            }, 600);
+        }
+
+        // Populate mock extracted data (simulating OCR)
+        function populateMockData() {
+            document.getElementById('sellerTaxCode').value = '0123456789';
+            document.getElementById('sellerName').value = 'Công Ty TNHH AI Employee Việt Nam';
+            document.getElementById('sellerAddress').value = '123 Nguyễn Trãi, Quận 1, Thành phố Hồ Chí Minh';
+
+            document.getElementById('buyerTaxCode').value = '9876543210';
+            document.getElementById('buyerName').value = 'Công Ty ABC Việt Nam';
+            document.getElementById('buyerAddress').value = '456 Lê Lợi, Quận 1, TP.HCM';
+
+            document.getElementById('itemDesc0').value = 'Dịch vụ AI Employee - Gói Growth hàng tháng';
+            document.getElementById('itemQty0').value = '1';
+            document.getElementById('itemPrice0').value = '499000';
+            document.getElementById('itemVat0').value = '10';
+
+            calculateItemTotal(0);
+            calculateTotals();
+        }
+
+        // Form listeners
+        function setupFormListeners() {
+            // Recalculate on any item change
+            document.addEventListener('input', (e) => {
+                if (e.target.id.startsWith('itemPrice') || e.target.id.startsWith('itemQty') || e.target.id.startsWith('itemVat')) {
+                    const idx = e.target.id.replace(/item(Price|Qty|Vat)/, '');
+                    calculateItemTotal(idx);
+                    calculateTotals();
+                }
+            });
+
+            document.addEventListener('change', (e) => {
+                if (e.target.id.startsWith('itemVat')) {
+                    const idx = e.target.id.replace(/itemVat/, '');
+                    calculateItemTotal(idx);
+                    calculateTotals();
+                }
+            });
+        }
+
+        function calculateItemTotal(idx) {
+            const qty = parseFloat(document.getElementById(`itemQty${idx}`)?.value) || 0;
+            const price = parseFloat(document.getElementById(`itemPrice${idx}`)?.value) || 0;
+            const vatRate = parseFloat(document.getElementById(`itemVat${idx}`)?.value) || 0;
+
+            const netAmount = qty * price;
+            const vatAmount = Math.round(netAmount * vatRate / 100);
+            const total = netAmount + vatAmount;
+
+            const totalEl = document.getElementById(`itemTotal${idx}`);
+            if (totalEl) {
+                totalEl.textContent = total.toLocaleString('vi-VN');
+            }
+        }
+
+        function calculateTotals() {
+            let netTotal = 0;
+            let vatTotal = 0;
+
+            for (let i = 0; i <= itemCount; i++) {
+                const qtyEl = document.getElementById(`itemQty${i}`);
+                const priceEl = document.getElementById(`itemPrice${i}`);
+                const vatEl = document.getElementById(`itemVat${i}`);
+
+                if (qtyEl && priceEl && vatEl) {
+                    const qty = parseFloat(qtyEl.value) || 0;
+                    const price = parseFloat(priceEl.value) || 0;
+                    const vatRate = parseFloat(vatEl.value) || 0;
+
+                    const net = qty * price;
+                    const vat = Math.round(net * vatRate / 100);
+
+                    netTotal += net;
+                    vatTotal += vat;
+                }
+            }
+
+            const grandTotal = netTotal + vatTotal;
+
+            document.getElementById('netTotal').value = netTotal.toLocaleString('vi-VN') + ' VND';
+            document.getElementById('vatTotal').value = vatTotal.toLocaleString('vi-VN') + ' VND';
+            document.getElementById('grandTotal').value = grandTotal.toLocaleString('vi-VN') + ' VND';
+        }
+
+        // Add item row
+        function setupAddItemButton() {
+            document.getElementById('addItemBtn').addEventListener('click', () => {
+                const tbody = document.getElementById('itemsTableBody');
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" id="itemDesc${itemCount}" placeholder="Mô tả sản phẩm/dịch vụ"></td>
+                    <td><input type="number" id="itemQty${itemCount}" value="1" min="1"></td>
+                    <td><input type="number" id="itemPrice${itemCount}" placeholder="0"></td>
+                    <td>
+                        <select id="itemVat${itemCount}">
+                            <option value="0">0%</option>
+                            <option value="5">5%</option>
+                            <option value="8">8%</option>
+                            <option value="10" selected>10%</option>
+                        </select>
+                    </td>
+                    <td>
+                        <span id="itemTotal${itemCount}">0</span>
+                        <button type="button" class="remove-item-btn" onclick="removeItem(${itemCount})">Xóa</button>
+                    </td>
+                `;
+                tbody.appendChild(newRow);
+                itemCount++;
+            });
+        }
+
+        window.removeItem = function(idx) {
+            const row = document.getElementById(`itemDesc${idx}`).closest('tr');
+            row.remove();
+            calculateTotals();
+        };
+
+        // Submit invoice
+        function setupSubmitButton() {
+            document.getElementById('submitBtn').addEventListener('click', async () => {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.classList.add('loading');
+                submitBtn.textContent = 'Đang gửi...';
+                hideError();
+
+                // Gather form data
+                const invoiceData = {
+                    seller: {
+                        taxCode: document.getElementById('sellerTaxCode').value,
+                        name: document.getElementById('sellerName').value,
+                        address: document.getElementById('sellerAddress').value
+                    },
+                    buyer: {
+                        taxCode: document.getElementById('buyerTaxCode').value,
+                        name: document.getElementById('buyerName').value,
+                        address: document.getElementById('buyerAddress').value
+                    },
+                    items: gatherItems(),
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    dueDate: document.getElementById('dueDate').value || null
+                };
+
+                try {
+                    const response = await fetch(`${API_BASE}/invoices`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(invoiceData)
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        // Show success
+                        document.getElementById('invoiceNumber').textContent = result.data.invoiceNumber;
+                        extractedData.classList.remove('active');
+                        successState.classList.add('active');
+                    } else {
+                        showError(result.error || 'Có lỗi xảy ra khi tạo hóa đơn');
+                    }
+                } catch (error) {
+                    console.error('API Error:', error);
+                    showError('Không thể kết nối đến server. Vui lòng thử lại.');
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('loading');
+                    submitBtn.textContent = '✓ Tạo hóa đơn';
+                }
+            });
+        }
+
+        function gatherItems() {
+            const items = [];
+            const rows = document.querySelectorAll('#itemsTableBody tr');
+
+            rows.forEach((row, idx) => {
+                const desc = document.getElementById(`itemDesc${idx}`)?.value;
+                const qty = parseFloat(document.getElementById(`itemQty${idx}`)?.value) || 1;
+                const price = parseFloat(document.getElementById(`itemPrice${idx}`)?.value) || 0;
+                const vatRate = parseFloat(document.getElementById(`itemVat${idx}`)?.value) || 10;
+
+                if (desc && price > 0) {
+                    items.push({
+                        description: desc,
+                        quantity: qty,
+                        unitPrice: price,
+                        vatRate: vatRate
+                    });
+                }
+            });
+
+            return items;
+        }
+
+        // Reset button
+        function setupResetButton() {
+            document.getElementById('resetBtn').addEventListener('click', resetUpload);
+            document.getElementById('newInvoiceBtn').addEventListener('click', resetUpload);
+        }
+
+        // Error handling
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+        }
+
+        function hideError() {
+            errorMessage.classList.remove('active');
+        }
+
+        function clearForm() {
+            document.querySelectorAll('input[type="text"], input[type="number"], input[type="date"]').forEach(input => {
+                if (!input.id.startsWith('item')) {
+                    input.value = '';
+                }
+            });
+            document.querySelectorAll('#itemsTableBody tr').forEach((row, idx) => {
+                if (idx > 0) row.remove();
+            });
+            document.getElementById('itemDesc0').value = '';
+            document.getElementById('itemQty0').value = '1';
+            document.getElementById('itemPrice0').value = '';
+            document.getElementById('itemVat0').value = '10';
+            document.getElementById('itemTotal0').textContent = '0';
+            document.getElementById('netTotal').value = '0 VND';
+            document.getElementById('vatTotal').value = '0 VND';
+            document.getElementById('grandTotal').value = '0 VND';
+            itemCount = 1;
+            hideError();
+        }
+
+        // Start
+        init();
+    </script>
+</body>
+</html>

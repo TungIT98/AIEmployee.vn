@@ -94,8 +94,32 @@ git pull origin main
 
 ## Monitoring
 
+### Log Files
 - Staging: Check logs at `/var/log/aiemployee-vn/staging.log`
 - Production: Check logs at `/var/log/aiemployee-vn/production.log`
+
+### Automated Health Monitoring
+
+A GitHub Actions workflow (`monitor.yml`) runs periodic health checks on both environments:
+
+- **Frequency**: Every 5 minutes during active hours (9am-11pm UTC)
+- **Checks**: Uptime, response time, HTTP error status
+- **Endpoints monitored**:
+  - Production: `https://aiemployee.vn`
+  - Staging: `https://staging.aiemployee.vn`
+
+#### Manual Health Check
+
+Run the monitor script locally:
+
+```bash
+node scripts/monitor_api.js --url=https://aiemployee.vn
+node scripts/monitor_api.js --url=https://staging.aiemployee.vn --staging
+```
+
+#### Adding Health Webhook
+
+To receive notifications on downtime, add a `HEALTH_WEBHOOK_URL` secret in GitHub → Settings → Secrets.
 
 ## Support
 

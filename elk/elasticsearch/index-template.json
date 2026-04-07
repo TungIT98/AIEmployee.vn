@@ -1,0 +1,144 @@
+{
+  "index_patterns": ["aiemployee-logs-*"],
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0,
+      "index.lifecycle.name": "aiemployee-logs-policy",
+      "index.lifecycle.rollover_alias": "aiemployee-logs",
+      "index.refresh_interval": "5s"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "id": {
+          "type": "keyword"
+        },
+        "timestamp": {
+          "type": "date"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "level": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "userId": {
+          "type": "keyword"
+        },
+        "sessionId": {
+          "type": "keyword"
+        },
+        "ipAddress": {
+          "type": "ip"
+        },
+        "userAgent": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 512
+            }
+          }
+        },
+        "method": {
+          "type": "keyword"
+        },
+        "path": {
+          "type": "keyword"
+        },
+        "statusCode": {
+          "type": "integer"
+        },
+        "duration": {
+          "type": "long"
+        },
+        "resource": {
+          "type": "keyword"
+        },
+        "resourceId": {
+          "type": "keyword"
+        },
+        "action": {
+          "type": "keyword"
+        },
+        "error": {
+          "type": "text",
+          "fields": {
+            "keyword": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "stack": {
+          "type": "text"
+        },
+        "metadata": {
+          "type": "object",
+          "enabled": true
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "geo": {
+          "properties": {
+            "city_name": {
+              "type": "keyword"
+            },
+            "country_name": {
+              "type": "keyword"
+            },
+            "region_name": {
+              "type": "keyword"
+            },
+            "location": {
+              "type": "geo_point"
+            }
+          }
+        },
+        "userAgentParsed": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "os": {
+              "type": "keyword"
+            },
+            "os_name": {
+              "type": "keyword"
+            },
+            "device": {
+              "type": "keyword"
+            },
+            "major": {
+              "type": "keyword"
+            },
+            "minor": {
+              "type": "keyword"
+            }
+          }
+        },
+        "processed_at": {
+          "type": "date"
+        }
+      }
+    }
+  },
+  "priority": 200,
+  "composed_of": [],
+  "_meta": {
+    "description": "Template for AIEmployee API logs - auth, access, error, change logs"
+  }
+}

@@ -1,0 +1,18 @@
+# Environment files with secrets
+.env
+.env.local
+.env.production
+
+# Keep example file
+!.env.example
+
+# Node.js
+node_modules/
+*.log
+
+# Docker
+*.tar
+
+# OS
+.DS_Store
+Thumbs.db

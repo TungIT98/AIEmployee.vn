@@ -66,8 +66,8 @@ const contactOps = {
   create: (data) => {
     const contact = {
       id: uuidv4(),
-      ...data,
-      status: 'new',
+      status: 'new',  // default status
+      ...data,        // data fields override defaults
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -83,6 +83,19 @@ const contactOps = {
     let results = [...store.contacts];
     if (filters.status) {
       results = results.filter(c => c.status === filters.status);
+    }
+    if (filters.sortBy) {
+      results.sort((a, b) => {
+        const aVal = a[filters.sortBy];
+        const bVal = b[filters.sortBy];
+        if (filters.order === 'desc') {
+          return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        }
+        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+      });
+    }
+    if (filters.limit) {
+      results = results.slice(0, filters.limit);
     }
     return results;
   },
@@ -111,8 +124,8 @@ const subscriptionOps = {
   create: (data) => {
     const subscription = {
       id: uuidv4(),
-      ...data,
-      status: 'active',
+      status: 'active',  // default status
+      ...data,            // data fields override defaults
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -123,6 +136,8 @@ const subscriptionOps = {
   findById: (id) => store.subscriptions.find(s => s.id === id),
 
   findByContactId: (contactId) => store.subscriptions.filter(s => s.contactId === contactId),
+
+  findAll: () => store.subscriptions,
 
   update: (id, data) => {
     const index = store.subscriptions.findIndex(s => s.id === id);
@@ -141,8 +156,8 @@ const employeeOps = {
   create: (data) => {
     const employee = {
       id: uuidv4(),
-      ...data,
-      status: 'active',
+      status: 'active',  // default status
+      ...data,           // data fields override defaults
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -180,8 +195,8 @@ const taskOps = {
   create: (data) => {
     const task = {
       id: uuidv4(),
-      ...data,
-      status: 'pending',
+      status: 'pending',  // default status
+      ...data,            // data fields override defaults
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -201,6 +216,19 @@ const taskOps = {
     if (filters.employeeId) {
       results = results.filter(t => t.employeeId === filters.employeeId);
     }
+    if (filters.sortBy) {
+      results.sort((a, b) => {
+        const aVal = a[filters.sortBy];
+        const bVal = b[filters.sortBy];
+        if (filters.order === 'desc') {
+          return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+        }
+        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+      });
+    }
+    if (filters.limit) {
+      results = results.slice(0, filters.limit);
+    }
     return results;
   },
 
@@ -216,11 +244,20 @@ const taskOps = {
   }
 };
 
+// Reset store (for testing)
+const resetStore = () => {
+  store.contacts = [];
+  store.subscriptions = [];
+  store.employees = [];
+  store.tasks = [];
+};
+
 module.exports = {
   store,
   contactOps,
   planOps,
   subscriptionOps,
   employeeOps,
-  taskOps
+  taskOps,
+  resetStore
 };

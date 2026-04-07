@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alerting Dashboard | AIEmployee.vn</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --critical: #dc3545;
+            --critical-bg: #fef2f2;
+            --alert: #fd7e14;
+            --alert-bg: #fff7ed;
+            --warning: #ffc107;
+            --warning-bg: #fffbeb;
+            --success: #10b981;
+            --success-bg: #ecfdf5;
+            --dark: #1e293b;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-500: #64748b;
+            --white: #ffffff;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--gray-50);
+            color: var(--dark);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .api-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .api-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gray-300);
+        }
+
+        .api-status-dot.connected { background: var(--success); }
+        .api-status-dot.error { background: var(--critical); }
+
+        /* Main Content */
+        .main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-card.critical { border-left: 4px solid var(--critical); }
+        .stat-card.alert { border-left: 4px solid var(--alert); }
+        .stat-card.warning { border-left: 4px solid var(--warning); }
+        .stat-card.active { border-left: 4px solid var(--primary); }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .stat-card.critical .stat-value { color: var(--critical); }
+        .stat-card.alert .stat-value { color: var(--alert); }
+        .stat-card.warning .stat-value { color: var(--warning); }
+        .stat-card.active .stat-value { color: var(--primary); }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: var(--white);
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .filters {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            background: var(--white);
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover { border-color: var(--gray-300); }
+        .filter-btn.active {
+            background: var(--primary);
+            color: var(--white);
+            border-color: var(--primary);
+        }
+
+        .new-alert-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .new-alert-btn:hover { background: var(--primary-dark); }
+
+        /* Alerts List */
+        .alerts-list {
+            background: var(--white);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .alerts-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-200);
+            font-weight: 600;
+        }
+
+        .alert-item {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--gray-100);
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            transition: background 0.2s;
+        }
+
+        .alert-item:last-child { border-bottom: none; }
+        .alert-item:hover { background: var(--gray-50); }
+
+        .alert-level {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-top: 0.35rem;
+            flex-shrink: 0;
+        }
+
+        .alert-level.critical { background: var(--critical); }
+        .alert-level.alert { background: var(--alert); }
+        .alert-level.warning { background: var(--warning); }
+
+        .alert-content { flex: 1; }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .alert-message {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 0.5rem;
+        }
+
+        .alert-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.75rem;
+            color: var(--gray-400);
+        }
+
+        .alert-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .alert-status.active {
+            background: var(--critical-bg);
+            color: var(--critical);
+        }
+
+        .alert-status.acknowledged {
+            background: var(--alert-bg);
+            color: var(--alert);
+        }
+
+        .alert-status.resolved {
+            background: var(--success-bg);
+            color: var(--success);
+        }
+
+        .alert-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .alert-action {
+            padding: 0.5rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.375rem;
+            background: var(--white);
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .alert-action:hover { background: var(--gray-50); }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show { display: flex; }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 0.75rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-200);
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .btn-secondary {
+            background: var(--gray-100);
+            border: 1px solid var(--gray-200);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-500);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-500);
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .filter-bar { flex-direction: column; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            Alerting Dashboard
+        </h1>
+        <div class="header-actions">
+            <div class="api-status">
+                <span class="api-status-dot" id="apiStatus"></span>
+                <span id="apiStatusText">Connecting...</span>
+            </div>
+            <button class="new-alert-btn" onclick="openModal()">+ New Alert</button>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="stats-grid">
+            <div class="stat-card critical">
+                <div class="stat-label">Critical</div>
+                <div class="stat-value" id="criticalCount">-</div>
+            </div>
+            <div class="stat-card alert">
+                <div class="stat-label">Alert</div>
+                <div class="stat-value" id="alertCount">-</div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-label">Warning</div>
+                <div class="stat-value" id="warningCount">-</div>
+            </div>
+            <div class="stat-card active">
+                <div class="stat-label">Active</div>
+                <div class="stat-value" id="activeCount">-</div>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="filters">
+                <button class="filter-btn active" onclick="setFilter('all')">All</button>
+                <button class="filter-btn" onclick="setFilter('active')">Active</button>
+                <button class="filter-btn" onclick="setFilter('acknowledged')">Acknowledged</button>
+                <button class="filter-btn" onclick="setFilter('resolved')">Resolved</button>
+            </div>
+            <div style="font-size: 0.875rem; color: var(--gray-500);">
+                Total: <span id="totalCount">0</span> alerts
+            </div>
+        </div>
+
+        <div class="alerts-list">
+            <div class="alerts-header">Alerts</div>
+            <div id="alertsContainer">
+                <div class="loading">Loading alerts...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Alert Modal -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <h2>Create New Alert</h2>
+            <form onsubmit="createAlert(event)">
+                <div class="form-group">
+                    <label>Title *</label>
+                    <input type="text" id="alertTitle" required placeholder="Alert title">
+                </div>
+                <div class="form-group">
+                    <label>Message *</label>
+                    <textarea id="alertMessage" required placeholder="Describe the alert..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Level *</label>
+                    <select id="alertLevel" required>
+                        <option value="critical">Critical</option>
+                        <option value="alert">Alert</option>
+                        <option value="warning">Warning</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Source</label>
+                    <input type="text" id="alertSource" placeholder="e.g., api, dashboard, system">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Alert</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://127.0.0.1:3000/api';
+        let alerts = [];
+        let currentFilter = 'all';
+
+        async function fetchAPI(endpoint, options = {}) {
+            try {
+                const res = await fetch(API_BASE + endpoint, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options
+                });
+                return await res.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                return null;
+            }
+        }
+
+        async function loadAlerts() {
+            const data = await fetchAPI('/alerts');
+            if (data && data.success) {
+                alerts = data.data;
+                updateStats(data.pagination?.total || alerts.length);
+                renderAlerts();
+                setAPIStatus(true);
+            } else {
+                setAPIStatus(false);
+            }
+        }
+
+        async function loadStats() {
+            const data = await fetchAPI('/alerts/stats');
+            if (data && data.success) {
+                const s = data.data;
+                document.getElementById('criticalCount').textContent = s.byLevel?.critical || 0;
+                document.getElementById('alertCount').textContent = s.byLevel?.alert || 0;
+                document.getElementById('warningCount').textContent = s.byLevel?.warning || 0;
+                document.getElementById('activeCount').textContent = s.byStatus?.active || 0;
+            }
+        }
+
+        function updateStats(total) {
+            document.getElementById('totalCount').textContent = total;
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderAlerts();
+        }
+
+        function renderAlerts() {
+            const container = document.getElementById('alertsContainer');
+            let filtered = alerts;
+
+            if (currentFilter !== 'all') {
+                filtered = alerts.filter(a => a.status === currentFilter);
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M20 6L9 17l-5-5"/>
+                        </svg>
+                        <p>No ${currentFilter === 'all' ? '' : currentFilter} alerts</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = filtered.map(alert => `
+                <div class="alert-item">
+                    <div class="alert-level ${alert.level}"></div>
+                    <div class="alert-content">
+                        <div class="alert-title">${escapeHtml(alert.title)}</div>
+                        <div class="alert-message">${escapeHtml(alert.message)}</div>
+                        <div class="alert-meta">
+                            <span>${alert.source || 'system'}</span>
+                            <span>${formatDate(alert.createdAt)}</span>
+                            <span>Level: ${alert.level}</span>
+                        </div>
+                    </div>
+                    <span class="alert-status ${alert.status}">${alert.status}</span>
+                    <div class="alert-actions">
+                        ${alert.status === 'active' ? `
+                            <button class="alert-action" onclick="acknowledgeAlert('${alert.id}')">Ack</button>
+                        ` : ''}
+                        ${alert.status !== 'resolved' ? `
+                            <button class="alert-action" onclick="resolveAlert('${alert.id}')">Resolve</button>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function createAlert(event) {
+            event.preventDefault();
+            const data = {
+                title: document.getElementById('alertTitle').value,
+                message: document.getElementById('alertMessage').value,
+                level: document.getElementById('alertLevel').value,
+                source: document.getElementById('alertSource').value || 'dashboard'
+            };
+
+            const result = await fetchAPI('/alerts', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (result && result.success) {
+                closeModal();
+                loadAlerts();
+                loadStats();
+            }
+        }
+
+        async function acknowledgeAlert(id) {
+            await fetchAPI(`/alerts/${id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'acknowledged' })
+            });
+            loadAlerts();
+            loadStats();
+        }
+
+        async function resolveAlert(id) {
+            await fetchAPI(`/alerts/${id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ status: 'resolved' })
+            });
+            loadAlerts();
+            loadStats();
+        }
+
+        function openModal() {
+            document.getElementById('createModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('createModal').classList.remove('show');
+            document.querySelector('form').reset();
+        }
+
+        function setAPIStatus(connected) {
+            const dot = document.getElementById('apiStatus');
+            const text = document.getElementById('apiStatusText');
+            if (connected) {
+                dot.className = 'api-status-dot connected';
+                text.textContent = 'Connected';
+            } else {
+                dot.className = 'api-status-dot error';
+                text.textContent = 'Disconnected';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Initial load
+        loadAlerts();
+        loadStats();
+        setInterval(loadAlerts, 10000); // Refresh every 10s
+    </script>
+</body>
+</html>

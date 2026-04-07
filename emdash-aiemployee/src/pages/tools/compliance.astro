@@ -1,0 +1,474 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+
+<Base title="Kiểm tra tuân thủ | AIEmployee.vn" description="Kiểm tra hóa đơn VAT có tuân thủ quy định Việt Nam không" canonical="https://aiemployee.vn/tools/compliance">
+
+  <div class="container" style="padding-top: 120px; padding-bottom: 60px; max-width: 1000px;">
+    <div class="page-header">
+      <h1>Kiểm tra tuân thủ hóa đơn</h1>
+      <p>Kiểm tra hóa đơn VAT theo Thông tư 68/2019/TT-BTC</p>
+    </div>
+
+    <div class="compliance-card">
+      <h2>Nhập thông tin hóa đơn</h2>
+      <form id="complianceForm">
+        <div class="form-section">
+          <h3>Thông tin người bán</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="sellerName">Tên công ty</label>
+              <input type="text" id="sellerName" name="sellerName" placeholder="Công ty ABC">
+            </div>
+            <div class="form-group">
+              <label for="sellerTaxCode">Mã số thuế</label>
+              <input type="text" id="sellerTaxCode" name="sellerTaxCode" placeholder="0123456789" maxlength="13">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="sellerAddress">Địa chỉ</label>
+            <input type="text" id="sellerAddress" name="sellerAddress" placeholder="123 Đường ABC, Quận 1, TP.HCM">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Thông tin người mua</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="buyerName">Tên công ty</label>
+              <input type="text" id="buyerName" name="buyerName" placeholder="Công ty XYZ">
+            </div>
+            <div class="form-group">
+              <label for="buyerTaxCode">Mã số thuế</label>
+              <input type="text" id="buyerTaxCode" name="buyerTaxCode" placeholder="9876543210" maxlength="13">
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="buyerAddress">Địa chỉ</label>
+            <input type="text" id="buyerAddress" name="buyerAddress" placeholder="456 Đường XYZ, Quận 2, TP.HCM">
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Thông tin hóa đơn</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="invoiceNumber">Số hóa đơn</label>
+              <input type="text" id="invoiceNumber" name="invoiceNumber" placeholder="0012345">
+            </div>
+            <div class="form-group">
+              <label for="vatRate">Thuế suất VAT (%)</label>
+              <select id="vatRate" name="vatRate">
+                <option value="0">0% - Miễn thuế</option>
+                <option value="5">5% - Giảm</option>
+                <option value="8">8% - Giảm (trước 2024)</option>
+                <option value="10" selected>10% - Tiêu chuẩn</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="totalAmount">Tổng tiền (VNĐ)</label>
+              <input type="text" id="totalAmount" name="totalAmount" placeholder="11.000.000">
+            </div>
+            <div class="form-group">
+              <label for="vatAmount">Tiền VAT (VNĐ)</label>
+              <input type="text" id="vatAmount" name="vatAmount" placeholder="1.000.000">
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span>✓</span> Kiểm tra tuân thủ
+        </button>
+      </form>
+    </div>
+
+    <div class="results-card" id="resultsCard" style="display: none;">
+      <h2>Kết quả kiểm tra</h2>
+      <div class="compliance-status" id="complianceStatus"></div>
+      <div class="compliance-details" id="complianceDetails"></div>
+      <div class="result-actions">
+        <button class="btn btn-secondary" id="newCheckBtn">
+          <span>↺</span> Kiểm tra mới
+        </button>
+      </div>
+    </div>
+
+    <div class="info-card">
+      <h3>📋 Quy tắc kiểm tra tuân thủ</h3>
+      <ul>
+        <li><strong>MST hợp lệ:</strong> 10-13 chữ số theo định dạng Việt Nam</li>
+        <li><strong>Thuế suất:</strong> Phải là 0%, 5%, 8%, hoặc 10%</li>
+        <li><strong>Tính toán VAT:</strong> VAT = Tổng tiền × Thuế suất / (1 + Thuế suất)</li>
+        <li><strong>Thông tư 68:</strong> Quy định về hóa đơn điện tử tại Việt Nam</li>
+      </ul>
+    </div>
+  </div>
+
+</Base>
+
+<style>
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .page-header h1 {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    color: var(--gray);
+    font-size: 16px;
+  }
+
+  .compliance-card,
+  .results-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 24px;
+  }
+
+  .compliance-card h2,
+  .results-card h2 {
+    font-size: 24px;
+    margin-bottom: 24px;
+  }
+
+  .form-section {
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-section:last-of-type {
+    border-bottom: none;
+  }
+
+  .form-section h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: var(--dark);
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+  }
+
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: var(--white);
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+  }
+
+  .btn-secondary {
+    background: var(--white);
+    color: var(--gray);
+    border: 1px solid var(--border);
+  }
+
+  .btn-secondary:hover {
+    background: var(--light);
+  }
+
+  .compliance-status {
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .compliance-status.pass {
+    background: #dcfce7;
+    color: var(--secondary);
+  }
+
+  .compliance-status.fail {
+    background: #fef2f2;
+    color: var(--danger);
+  }
+
+  .compliance-status .status-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  .compliance-status .status-text {
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .compliance-details {
+    background: var(--light);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .compliance-details h4 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--gray);
+    text-transform: uppercase;
+  }
+
+  .detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .detail-row:last-child {
+    border-bottom: none;
+  }
+
+  .detail-label {
+    color: var(--gray);
+  }
+
+  .detail-value {
+    font-weight: 600;
+  }
+
+  .detail-value.success {
+    color: var(--secondary);
+  }
+
+  .detail-value.error {
+    color: var(--danger);
+  }
+
+  .result-actions {
+    margin-top: 24px;
+  }
+
+  .info-card {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  .info-card h3 {
+    font-size: 16px;
+    margin-bottom: 16px;
+    color: #92400e;
+  }
+
+  .info-card ul {
+    list-style: none;
+    font-size: 14px;
+    color: #a16207;
+  }
+
+  .info-card li {
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+  }
+
+  .info-card li::before {
+    content: "•";
+    position: absolute;
+    left: 8px;
+    color: #f59e0b;
+  }
+
+  @media (max-width: 768px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+
+    .compliance-card,
+    .results-card {
+      padding: 24px;
+    }
+  }
+</style>
+
+<script>
+  const complianceForm = document.getElementById('complianceForm') as HTMLFormElement;
+  const resultsCard = document.getElementById('resultsCard');
+  const complianceStatus = document.getElementById('complianceStatus');
+  const complianceDetails = document.getElementById('complianceDetails');
+  const newCheckBtn = document.getElementById('newCheckBtn');
+
+  // Vietnamese tax code validation
+  function validateTaxCode(taxCode: string): { valid: boolean; message: string } {
+    const cleaned = taxCode.replace(/\D/g, '');
+
+    if (cleaned.length < 10 || cleaned.length > 13) {
+      return { valid: false, message: `MST phải có 10-13 chữ số (hiện tại: ${cleaned.length})` };
+    }
+
+    // Basic checksum validation for 10-digit MST
+    if (cleaned.length === 10) {
+      const weights = [31, 29, 23, 19, 17, 13, 7, 5, 3];
+      let sum = 0;
+      for (let i = 0; i < 9; i++) {
+        sum += parseInt(cleaned[i]) * weights[i];
+      }
+      const check = (10 - (sum % 10)) % 10;
+      if (check !== parseInt(cleaned[9])) {
+        return { valid: false, message: 'MST 10 số không hợp lệ (checksum sai)' };
+      }
+    }
+
+    return { valid: true, message: 'MST hợp lệ' };
+  }
+
+  // VAT calculation validation
+  function validateVATCalculation(totalAmount: number, vatAmount: number, vatRate: number): { valid: boolean; expectedVat: number } {
+    // From gross (totalAmount), calculate expected VAT
+    const expectedVat = Math.round(totalAmount - (totalAmount / (1 + vatRate / 100)));
+    const diff = Math.abs(vatAmount - expectedVat);
+
+    // Allow rounding difference of up to 100 VND
+    return {
+      valid: diff <= 100,
+      expectedVat
+    };
+  }
+
+  complianceForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(complianceForm);
+    const sellerTaxCode = (formData.get('sellerTaxCode') as string) || '';
+    const buyerTaxCode = (formData.get('buyerTaxCode') as string) || '';
+    const vatRate = parseInt(formData.get('vatRate') as string) || 10;
+    const totalAmount = parseInt((formData.get('totalAmount') as string)?.replace(/\D/g, '') || '0');
+    const vatAmount = parseInt((formData.get('vatAmount') as string)?.replace(/\D/g, '') || '0');
+
+    const checks: Array<{ label: string; valid: boolean; message: string }> = [];
+    let allPassed = true;
+
+    // Check seller MST
+    const sellerValidation = validateTaxCode(sellerTaxCode);
+    checks.push({
+      label: 'MST người bán',
+      valid: sellerValidation.valid,
+      message: sellerValidation.message
+    });
+    if (!sellerValidation.valid) allPassed = false;
+
+    // Check buyer MST
+    const buyerValidation = validateTaxCode(buyerTaxCode);
+    checks.push({
+      label: 'MST người mua',
+      valid: buyerValidation.valid,
+      message: buyerValidation.message
+    });
+    if (!buyerValidation.valid) allPassed = false;
+
+    // Check VAT rate
+    const validRates = [0, 5, 8, 10];
+    if (!validRates.includes(vatRate)) {
+      checks.push({ label: 'Thuế suất VAT', valid: false, message: 'Thuế suất không hợp lệ' });
+      allPassed = false;
+    } else {
+      checks.push({ label: 'Thuế suất VAT', valid: true, message: `${vatRate}% - hợp lệ` });
+    }
+
+    // Check VAT calculation
+    if (totalAmount > 0 && vatAmount > 0) {
+      const vatValidation = validateVATCalculation(totalAmount, vatAmount, vatRate);
+      checks.push({
+        label: 'Tính toán VAT',
+        valid: vatValidation.valid,
+        message: vatValidation.valid
+          ? 'Tính toán chính xác'
+          : `Sai: mong đợi ${new Intl.NumberFormat('vi-VN').format(vatValidation.expectedVat)} VND`
+      });
+      if (!vatValidation.valid) allPassed = false;
+    }
+
+    // Display results
+    resultsCard.style.display = 'block';
+    complianceStatus.className = `compliance-status ${allPassed ? 'pass' : 'fail'}`;
+    complianceStatus.innerHTML = `
+      <div class="status-icon">${allPassed ? '✓' : '✗'}</div>
+      <div class="status-text">${allPassed ? 'Hóa đơn hợp lệ!' : 'Phát hiện lỗi tuân thủ'}</div>
+    `;
+
+    complianceDetails.innerHTML = `
+      <h4>Chi tiết kiểm tra</h4>
+      ${checks.map(check => `
+        <div class="detail-row">
+          <span class="detail-label">${check.label}</span>
+          <span class="detail-value ${check.valid ? 'success' : 'error'}">
+            ${check.valid ? '✓' : '✗'} ${check.message}
+          </span>
+        </div>
+      `).join('')}
+    `;
+
+    // Scroll to results
+    resultsCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  newCheckBtn.addEventListener('click', () => {
+    resultsCard.style.display = 'none';
+    complianceForm.reset();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+</script>

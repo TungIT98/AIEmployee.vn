@@ -1,0 +1,14 @@
+# Ignore development files
+*.md
+*.log
+.env*
+.git
+.gitignore
+Dockerfile
+.dockerignore
+node_modules
+coverage
+.nyc_output
+src/**/*.test.js
+src/**/*.spec.js
+backups

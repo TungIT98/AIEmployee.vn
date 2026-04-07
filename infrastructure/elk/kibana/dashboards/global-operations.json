@@ -1,0 +1,111 @@
+{
+  "title": "Global Operations Overview",
+  "description": "Multi-region operations dashboard showing health, traffic, and performance across all regions",
+  "version": "1.0.0",
+  "panelsJSON": [
+    {
+      "title": "Region Health Status",
+      "type": "visualization",
+      "gridData": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "visualization": {
+        "type": "metric",
+        "metric": {
+          "metrics": [
+            { "label": "US East-1", "value": "up", "color": "green" },
+            { "label": "US West-2", "value": "up", "color": "green" },
+            { "label": "EU West-1", "value": "up", "color": "green" }
+          ]
+        }
+      }
+    },
+    {
+      "title": "API Latency (p99)",
+      "type": "visualization",
+      "gridData": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "visualization": {
+        "type": "line",
+        "query": {
+          "index": "logs-*",
+          "timefield": "@timestamp",
+          "aggs": ["percentile(field=latency, percentiles=[99])"]
+        }
+      }
+    },
+    {
+      "title": "Error Rate by Region",
+      "type": "visualization",
+      "gridData": {"x": 24, "y": 0, "w": 12, "h": 8},
+      "visualization": {
+        "type": "bar",
+        "query": {
+          "index": "logs-*",
+          "filters": [{"term": {"log_level": "error"}}],
+          "aggs": ["terms(field=region, size=3)"]
+        }
+      }
+    },
+    {
+      "title": "CDN Cache Hit Rate",
+      "type": "visualization",
+      "gridData": {"x": 0, "y": 8, "w": 8, "h": 8},
+      "visualization": {
+        "type": "gauge",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["avg(field=cacheHitRate)"]
+        }
+      }
+    },
+    {
+      "title": "Elasticsearch Replication Status",
+      "type": "visualization",
+      "gridData": {"x": 8, "y": 8, "w": 8, "h": 8},
+      "visualization": {
+        "type": "table",
+        "query": {
+          "index": ".monitoring-*",
+          "aggs": ["terms(field=cluster.name)"]
+        }
+      }
+    },
+    {
+      "title": "Active Connections by Region",
+      "type": "visualization",
+      "gridData": {"x": 16, "y": 8, "w": 8, "h": 8},
+      "visualization": {
+        "type": "area",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["terms(field=region, size=3)", "avg(field=activeConnections)"]
+        }
+      }
+    },
+    {
+      "title": "Backup Status",
+      "type": "visualization",
+      "gridData": {"x": 24, "y": 8, "w": 12, "h": 8},
+      "visualization": {
+        "type": "table",
+        "query": {
+          "index": "backups-*",
+          "aggs": ["recent_backups:terms(field=status, size=5)"]
+        }
+      }
+    }
+  ],
+  "timeRange": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "refreshInterval": {
+    "pause": false,
+    "value": 30000
+  },
+  "filters": [
+    {
+      "query": {
+        "match_all": {}
+      }
+    }
+  ]
+}

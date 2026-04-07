@@ -1,0 +1,37 @@
+# Logstash Configuration File
+# Base configuration for Logstash service
+
+node.name: "logstash-global"
+path.data: /var/lib/logstash
+path.logs: /var/log/logstash
+
+# Pipeline settings
+pipeline.workers: 4
+pipeline.batch.size: 125
+pipeline.batch.delay: 50
+
+# Monitoring
+api.enabled: true
+api.http.host: 0.0.0.0
+api.http.port: 9600
+
+# Security
+xpack.monitoring.enabled: true
+xpack.monitoring.elasticsearch.hosts: ["https://${ES_HOST:elasticsearch-master:9200}"]
+
+# Queue settings
+queue.type: persisted
+queue.max_bytes: 1gb
+queue.checkpoint.acks: true
+queue.checkpoint.writes: 1
+
+# Slow log thresholds
+log.level: info
+slowlog.threshold.warn: 2s
+slowlog.threshold.info: 1s
+slowlog.threshold.debug: 500ms
+slowlog.threshold.trace: 100ms
+
+# Environment variables
+ENVIRONMENT: production
+REGION: us-east-1

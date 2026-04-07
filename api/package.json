@@ -6,15 +6,24 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "npx jest",
+    "security:audit": "npm audit",
+    "security:check": "node ../scripts/dependency-check.js",
+    "security:full": "npm audit && node ../scripts/dependency-check.js"
   },
-  "keywords": ["api", "aiemployee", "backend"],
+  "keywords": [
+    "api",
+    "aiemployee",
+    "backend"
+  ],
   "author": "Company OS",
   "license": "MIT",
   "dependencies": {
-    "express": "^4.18.2",
     "cors": "^2.8.5",
+    "express": "^4.18.2",
     "helmet": "^7.1.0",
+    "ioredis": "^5.3.2",
+    "node-cron": "^3.0.3",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

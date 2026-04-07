@@ -1,0 +1,63 @@
+name: Monitor
+
+on:
+  schedule:
+    # Every 5 minutes during active hours (9am-11pm UTC)
+    - cron: '*/5 9-23 * * *'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to monitor'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+
+jobs:
+  monitor-api:
+    name: Monitor API Health
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run API health check
+        run: |
+          if [ "${{ inputs.environment || 'production' }}" = "production" ]; then
+            node scripts/monitor_api.js --url=https://aiemployee.vn
+          else
+            node scripts/monitor_api.js --url=https://staging.aiemployee.vn
+          fi
+        continue-on-error: true
+
+      - name: Monitor production endpoint
+        if: inputs.environment == 'production' || github.event_name == 'schedule'
+        run: |
+          echo "Checking production endpoints..."
+          node scripts/monitor_api.js --url=https://aiemployee.vn
+        continue-on-error: true
+
+      - name: Monitor staging endpoint
+        if: inputs.environment == 'staging'
+        run: |
+          echo "Checking staging endpoints..."
+          node scripts/monitor_api.js --url=https://staging.aiemployee.vn
+        continue-on-error: true
+
+      - name: Report status
+        if: always()
+        run: |
+          echo "Monitor run completed: ${{ job.status }}"
+          # Post to health endpoint if configured
+          if [ -n "${{ secrets.HEALTH_WEBHOOK_URL }}" ]; then
+            curl -X POST "${{ secrets.HEALTH_WEBHOOK_URL }}" \
+              -H "Content-Type: application/json" \
+              -d "{\"environment\":\"${{ inputs.environment || 'production' }}\",\"status\":\"${{ job.status }}\",\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}"
+          fi

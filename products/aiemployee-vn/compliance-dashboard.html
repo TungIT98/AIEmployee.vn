@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compliance Dashboard | AIEmployee.vn</title>
+    <link rel="canonical" href="https://aiemployee.vn/compliance-dashboard">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --gray: #64748b;
+            --light: #f8fafc;
+            --white: #ffffff;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            color: var(--dark);
+            line-height: 1.6;
+            background: var(--light);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 20px 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 40px;
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--dark);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .last-updated {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .refresh-btn {
+            padding: 8px 16px;
+            background: var(--white);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+
+        .refresh-btn:hover {
+            background: var(--light);
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .page-header p {
+            color: var(--gray);
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .stat-card .stat-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .stat-card .stat-icon.green { background: #dcfce7; }
+        .stat-card .stat-icon.yellow { background: #fef3c7; }
+        .stat-card .stat-icon.red { background: #fee2e2; }
+        .stat-card .stat-icon.blue { background: #dbeafe; }
+
+        .stat-card .stat-trend {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .stat-card .stat-trend.up {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stat-card .stat-trend.down {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        /* Compliance Score Card */
+        .compliance-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 32px;
+        }
+
+        .compliance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .compliance-header h2 {
+            font-size: 18px;
+        }
+
+        .compliance-score-display {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            position: relative;
+        }
+
+        .score-circle svg {
+            transform: rotate(-90deg);
+        }
+
+        .score-circle .bg {
+            fill: none;
+            stroke: var(--border);
+            stroke-width: 8;
+        }
+
+        .score-circle .progress {
+            fill: none;
+            stroke: var(--secondary);
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 37.68; /* 85% */
+            transition: stroke-dashoffset 1s ease;
+        }
+
+        .score-circle .score-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .score-circle .score-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--secondary);
+        }
+
+        .score-circle .score-label {
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .score-details {
+            flex: 1;
+        }
+
+        .score-details h3 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .score-details p {
+            color: var(--gray);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .score-breakdown {
+            display: flex;
+            gap: 24px;
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .score-item .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .score-item .dot.green { background: var(--secondary); }
+        .score-item .dot.yellow { background: var(--warning); }
+        .score-item .dot.red { background: var(--danger); }
+
+        /* Main Grid */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+
+        /* Card Styles */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header h3 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .card-header .view-all {
+            font-size: 13px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Invoice List */
+        .invoice-list {
+            list-style: none;
+        }
+
+        .invoice-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .invoice-item:last-child {
+            border-bottom: none;
+        }
+
+        .invoice-status {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            font-size: 18px;
+        }
+
+        .invoice-status.valid {
+            background: #dcfce7;
+        }
+
+        .invoice-status.warning {
+            background: #fef3c7;
+        }
+
+        .invoice-status.invalid {
+            background: #fee2e2;
+        }
+
+        .invoice-info {
+            flex: 1;
+        }
+
+        .invoice-info .invoice-number {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .invoice-info .invoice-date {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .invoice-amount {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .invoice-badge {
+            margin-left: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .invoice-badge.valid {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .invoice-badge.warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .invoice-badge.invalid {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Violations */
+        .violation-list {
+            list-style: none;
+        }
+
+        .violation-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .violation-item:last-child {
+            border-bottom: none;
+        }
+
+        .violation-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: #fee2e2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .violation-content {
+            flex: 1;
+        }
+
+        .violation-content .violation-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .violation-content .violation-detail {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .violation-date {
+            font-size: 11px;
+            color: var(--gray);
+            white-space: nowrap;
+        }
+
+        /* Zalo History */
+        .zalo-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .zalo-item:last-child {
+            border-bottom: none;
+        }
+
+        .zalo-icon {
+            width: 36px;
+            height: 36px;
+            background: #0068ff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .zalo-content {
+            flex: 1;
+        }
+
+        .zalo-content .zalo-title {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .zalo-content .zalo-message {
+            font-size: 12px;
+            color: var(--gray);
+            margin-bottom: 4px;
+        }
+
+        .zalo-time {
+            font-size: 11px;
+            color: var(--gray);
+        }
+
+        .zalo-status {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .zalo-status.sent {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .zalo-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .zalo-status.failed {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--gray);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .compliance-header {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+
+            .score-breakdown {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .score-details h3 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">AI<span>Employee</span>.vn</a>
+            <div class="header-actions">
+                <span class="last-updated">Cập nhật: <span id="lastUpdated">10/04/2026 14:30</span></span>
+                <button class="refresh-btn" id="refreshBtn">
+                    <span>↻</span> Làm mới
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>Compliance Dashboard</h1>
+            <p>Theo dõi tình trạng tuân thủ hóa đơn điện tử</p>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon green">📄</div>
+                    <span class="stat-trend up">+12%</span>
+                </div>
+                <div class="stat-value">1,284</div>
+                <div class="stat-label">Tổng số hóa đơn</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon blue">✓</div>
+                    <span class="stat-trend up">+8%</span>
+                </div>
+                <div class="stat-value">1,156</div>
+                <div class="stat-label">Hóa đơn hợp lệ</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon yellow">⚠</div>
+                    <span class="stat-trend down">-3%</span>
+                </div>
+                <div class="stat-value">98</div>
+                <div class="stat-label">Cảnh báo</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon red">✕</div>
+                </div>
+                <div class="stat-value">30</div>
+                <div class="stat-label">Vi phạm</div>
+            </div>
+        </div>
+
+        <!-- Compliance Score -->
+        <div class="compliance-card">
+            <div class="compliance-header">
+                <h2>Điểm tuân thủ</h2>
+            </div>
+            <div class="compliance-score-display">
+                <div class="score-circle">
+                    <svg width="100" height="100" viewBox="0 0 100 100">
+                        <circle class="bg" cx="50" cy="50" r="40"/>
+                        <circle class="progress" cx="50" cy="50" r="40" id="scoreProgress"/>
+                    </svg>
+                    <div class="score-text">
+                        <div class="score-value" id="scoreValue">85</div>
+                        <div class="score-label">/ 100</div>
+                    </div>
+                </div>
+                <div class="score-details">
+                    <h3>Tốt</h3>
+                    <p>Điểm tuân thủ của doanh nghiệp đang ở mức khá. Cần cải thiện một số lỗi nhỏ để đạt mức xuất sắc.</p>
+                    <div class="score-breakdown">
+                        <div class="score-item">
+                            <span class="dot green"></span>
+                            <span>Đạt: <strong>90%</strong></span>
+                        </div>
+                        <div class="score-item">
+                            <span class="dot yellow"></span>
+                            <span>Cảnh báo: <strong>7%</strong></span>
+                        </div>
+                        <div class="score-item">
+                            <span class="dot red"></span>
+                            <span>Vi phạm: <strong>3%</strong></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Left Column -->
+            <div>
+                <!-- Recent Invoices -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Hóa đơn gần đây</h3>
+                        <a href="#" class="view-all">Xem tất cả →</a>
+                    </div>
+                    <ul class="invoice-list" id="invoiceList">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Recent Violations -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-header">
+                        <h3>Vi phạm gần đây</h3>
+                    </div>
+                    <ul class="violation-list" id="violationList">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <!-- Zalo Notifications -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Lịch sử Zalo</h3>
+                    </div>
+                    <div id="zaloList">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock Data
+        const mockData = {
+            invoices: [
+                { number: 'AE/26/0402/00001', date: '10/04/2026', amount: 549000, status: 'valid', badge: 'Hợp lệ' },
+                { number: 'AE/26/0402/00002', date: '10/04/2026', amount: 1100000, status: 'warning', badge: 'Cảnh báo' },
+                { number: 'AE/26/0402/00003', date: '09/04/2026', amount: 330000, status: 'valid', badge: 'Hợp lệ' },
+                { number: 'AE/26/0402/00004', date: '09/04/2026', amount: 825000, status: 'invalid', badge: 'Lỗi' },
+                { number: 'AE/26/0402/00005', date: '08/04/2026', amount: 440000, status: 'valid', badge: 'Hợp lệ' }
+            ],
+            violations: [
+                { title: 'Sai mã số thuế', detail: 'MST không đúng định dạng 10 chữ số', date: '09/04/2026' },
+                { title: 'Tỷ lệ VAT bất thường', detail: 'VAT 15% không hợp lệ', date: '08/04/2026' },
+                { title: 'Thiếu thông tin người bán', detail: 'Địa chỉ không đầy đủ', date: '07/04/2026' }
+            ],
+            zaloHistory: [
+                { title: 'Gửi báo cáo tuần', message: 'Báo cáo tuần 14 đã được gửi', time: '2 giờ trước', status: 'sent' },
+                { title: 'Cảnh báo vi phạm mới', message: 'Phát hiện 2 hóa đơn lỗi', time: '5 giờ trước', status: 'sent' },
+                { title: 'Nhắc nộp thuế', message: 'Đến hạn nộp thuế tháng 4', time: '1 ngày trước', status: 'pending' }
+            ]
+        };
+
+        // Format currency
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' VND';
+        }
+
+        // Render invoice list
+        function renderInvoices() {
+            const list = document.getElementById('invoiceList');
+            list.innerHTML = mockData.invoices.map(inv => `
+                <li class="invoice-item">
+                    <div class="invoice-status ${inv.status}">
+                        ${inv.status === 'valid' ? '✓' : inv.status === 'warning' ? '⚠' : '✕'}
+                    </div>
+                    <div class="invoice-info">
+                        <div class="invoice-number">${inv.number}</div>
+                        <div class="invoice-date">${inv.date}</div>
+                    </div>
+                    <div class="invoice-amount">${formatCurrency(inv.amount)}</div>
+                    <span class="invoice-badge ${inv.status}">${inv.badge}</span>
+                </li>
+            `).join('');
+        }
+
+        // Render violations
+        function renderViolations() {
+            const list = document.getElementById('violationList');
+            if (mockData.violations.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">🎉</div><p>Không có vi phạm gần đây</p></div>';
+                return;
+            }
+            list.innerHTML = mockData.violations.map(v => `
+                <li class="violation-item">
+                    <div class="violation-icon">!</div>
+                    <div class="violation-content">
+                        <div class="violation-title">${v.title}</div>
+                        <div class="violation-detail">${v.detail}</div>
+                    </div>
+                    <span class="violation-date">${v.date}</span>
+                </li>
+            `).join('');
+        }
+
+        // Render Zalo history
+        function renderZaloHistory() {
+            const list = document.getElementById('zaloList');
+            list.innerHTML = mockData.zaloHistory.map(z => `
+                <div class="zalo-item">
+                    <div class="zalo-icon">Z</div>
+                    <div class="zalo-content">
+                        <div class="zalo-title">${z.title}</div>
+                        <div class="zalo-message">${z.message}</div>
+                        <div class="zalo-time">${z.time}</div>
+                    </div>
+                    <span class="zalo-status ${z.status}">${z.status === 'sent' ? 'Đã gửi' : z.status === 'pending' ? 'Đang chờ' : 'Thất bại'}</span>
+                </div>
+            `).join('');
+        }
+
+        // Update timestamp
+        function updateTimestamp() {
+            const now = new Date();
+            const formatted = now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('lastUpdated').textContent = formatted;
+        }
+
+        // Refresh handler
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            updateTimestamp();
+            // In a real app, this would fetch fresh data
+            alert('Dữ liệu đã được làm mới!');
+        });
+
+        // Initialize
+        renderInvoices();
+        renderViolations();
+        renderZaloHistory();
+    </script>
+</body>
+</html>

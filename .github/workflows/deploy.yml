@@ -16,76 +16,222 @@ on:
 
 env:
   NODE_VERSION: '20'
+  REGISTRY: ghcr.io
+  API_IMAGE_NAME: ${{ github.repository }}/aiemployee-api
+  FRONTEND_IMAGE_NAME: ${{ github.repository }}/aiemployee-frontend
 
 jobs:
+  # ============================================
+  # Build and push Docker images
+  # ============================================
+  build-api:
+    name: Build API Docker image
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for API
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push API image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./api
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            NODE_ENV=${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+
+  build-frontend:
+    name: Build Frontend Docker image
+    runs-on: ubuntu-latest
+    outputs:
+      image-tag: ${{ steps.meta.outputs.tags }}
+      digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata for Frontend
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix={{branch}}-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+
+      - name: Build and push Frontend image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: ./products/aiemployee-vn
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================
+  # Deploy to Staging
+  # ============================================
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
     environment: staging
+    needs: [build-api, build-frontend]
     if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy to staging via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          host: ${{ secrets.STAGING_SERVER }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            set -e
 
-      - name: Install dependencies
-        run: |
-          npm install
+            # Login to container registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run tests
-        run: |
-          npm test || echo "No tests configured yet"
+            # Pull new images
+            docker pull ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
 
-      - name: Deploy to staging
-        run: |
-          echo "Deploying to staging server..."
-          # rsync -avz --delete build/ user@staging-server:/var/www/aiemployee-vn/
-          echo "Staging deployment complete"
-        env:
-          STAGING_SERVER: ${{ secrets.STAGING_SERVER }}
-          STAGING_KEY: ${{ secrets.STAGING_SSH_KEY }}
+            # Stop and remove old containers
+            docker stop aiemployee-api-staging || true
+            docker rm aiemployee-api-staging || true
+            docker stop aiemployee-frontend-staging || true
+            docker rm aiemployee-frontend-staging || true
+
+            # Run new API container
+            docker run -d \
+              --name aiemployee-api-staging \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              -e NODE_ENV=staging \
+              -e PORT=3000 \
+              -e ELASTICSEARCH_URL=http://elasticsearch:9200 \
+              -e LOG_LEVEL=info \
+              ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}:latest
+
+            # Run new Frontend container
+            docker run -d \
+              --name aiemployee-frontend-staging \
+              --restart unless-stopped \
+              -p 8080:80 \
+              -e API_URL=http://localhost:3000 \
+              ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+
+            # Verify deployment
+            sleep 5
+            curl -f http://localhost:3000/health || exit 1
+            curl -f http://localhost:8080/health || exit 1
+
+            echo "Staging deployment complete"
 
       - name: Verify staging deployment
         run: |
           sleep 5
           curl -f https://staging.aiemployee.vn || echo "Staging URL not configured yet"
 
+  # ============================================
+  # Deploy to Production
+  # ============================================
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
     environment: production
-    needs: deploy-staging
+    needs: [build-api, build-frontend, deploy-staging]
     if: github.event.inputs.environment == 'production' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Deploy to production via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          host: ${{ secrets.PRODUCTION_SERVER }}
+          username: ${{ secrets.PRODUCTION_USER }}
+          key: ${{ secrets.PRODUCTION_SSH_KEY }}
+          script: |
+            set -e
 
-      - name: Install dependencies
-        run: |
-          npm install
+            # Login to container registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      - name: Run pre-deployment checks
-        run: |
-          echo "Running pre-deployment checks..."
-          npm test || exit 1
+            # Pull new images
+            docker pull ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}:latest
+            docker pull ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
 
-      - name: Deploy to production
-        run: |
-          echo "Deploying to production server..."
-          # rsync -avz --delete build/ user@production-server:/var/www/aiemployee-vn/
-          echo "Production deployment complete"
-        env:
-          PRODUCTION_SERVER: ${{ secrets.PRODUCTION_SERVER }}
-          PRODUCTION_KEY: ${{ secrets.PRODUCTION_SSH_KEY }}
+            # Stop and remove old containers (blue-green style)
+            docker stop aiemployee-api-prod || true
+            docker rm aiemployee-api-prod || true
+            docker stop aiemployee-frontend-prod || true
+            docker rm aiemployee-frontend-prod || true
+
+            # Run new API container
+            docker run -d \
+              --name aiemployee-api-prod \
+              --restart unless-stopped \
+              -p 3000:3000 \
+              -e NODE_ENV=production \
+              -e PORT=3000 \
+              -e ELASTICSEARCH_URL=http://elasticsearch:9200 \
+              -e LOG_LEVEL=warn \
+              ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}:latest
+
+            # Run new Frontend container
+            docker run -d \
+              --name aiemployee-frontend-prod \
+              --restart unless-stopped \
+              -p 80:80 \
+              -e API_URL=https://api.aiemployee.vn \
+              ${{ env.REGISTRY }}/${{ env.FRONTEND_IMAGE_NAME }}:latest
+
+            # Verify deployment
+            sleep 5
+            curl -f http://localhost:3000/health || exit 1
+            curl -f http://localhost:80/health || exit 1
+
+            echo "Production deployment complete"
 
       - name: Verify production deployment
         run: |

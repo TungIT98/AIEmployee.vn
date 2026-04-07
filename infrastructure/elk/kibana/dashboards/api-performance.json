@@ -1,0 +1,114 @@
+{
+  "title": "API Performance Dashboard",
+  "description": "Detailed API performance metrics including latency, throughput, and error rates",
+  "version": "1.0.0",
+  "panelsJSON": [
+    {
+      "title": "Request Rate (RPM)",
+      "type": "visualization",
+      "gridData": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "visualization": {
+        "type": "line",
+        "query": {
+          "index": "logs-*",
+          "timefield": "@timestamp",
+          "aggs": ["rate(field=requests, unit=minute)"]
+        }
+      }
+    },
+    {
+      "title": "Latency Distribution (p50, p95, p99)",
+      "type": "visualization",
+      "gridData": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "visualization": {
+        "type": "line",
+        "query": {
+          "index": "logs-*",
+          "timefield": "@timestamp",
+          "aggs": ["percentiles(field=latency, percentiles=[50,95,99])"]
+        }
+      }
+    },
+    {
+      "title": "HTTP Status Codes",
+      "type": "visualization",
+      "gridData": {"x": 0, "y": 8, "w": 12, "h": 8},
+      "visualization": {
+        "type": "pie",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["terms(field=status_code, size=10)"]
+        }
+      }
+    },
+    {
+      "title": "Top 10 Slow Endpoints",
+      "type": "visualization",
+      "gridData": {"x": 12, "y": 8, "w": 12, "h": 8},
+      "visualization": {
+        "type": "table",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["topHits(field=endpoint, size=10, aggs=[avg(field=latency)])"]
+        }
+      }
+    },
+    {
+      "title": "Error Logs (Last 24h)",
+      "type": "visualization",
+      "gridData": {"x": 0, "y": 16, "w": 24, "h": 10},
+      "visualization": {
+        "type": "table",
+        "query": {
+          "index": "logs-*",
+          "filters": [{"term": {"log_level": "error"}}],
+          "aggs": ["recent:sort(field=@timestamp, order=desc, size=100)"]
+        }
+      }
+    },
+    {
+      "title": "Request Size (bytes)",
+      "type": "visualization",
+      "gridData": {"x": 24, "y": 16, "w": 12, "h": 10},
+      "visualization": {
+        "type": "histogram",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["histogram(field=requestSize, interval=1000)"]
+        }
+      }
+    },
+    {
+      "title": "Response Size (bytes)",
+      "type": "visualization",
+      "gridData": {"x": 0, "y": 26, "w": 12, "h": 8},
+      "visualization": {
+        "type": "histogram",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["histogram(field=responseSize, interval=1000)"]
+        }
+      }
+    },
+    {
+      "title": "API Health by Region",
+      "type": "visualization",
+      "gridData": {"x": 12, "y": 26, "w": 12, "h": 8},
+      "visualization": {
+        "type": "heatmap",
+        "query": {
+          "index": "logs-*",
+          "aggs": ["terms(field=region, size=3)", "terms(field=endpoint, size=20)", "avg(field=latency)"]
+        }
+      }
+    }
+  ],
+  "timeRange": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "refreshInterval": {
+    "pause": false,
+    "value": 60000
+  }
+}
