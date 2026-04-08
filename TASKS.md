@@ -132,6 +132,8 @@
 | COM-121 | BE: Auto-Recovery & Restart Service | ✅ Done | Backend Dev | Self-healing triggers, retry logic |
 | COM-122 | DevOps: Container Health Monitoring | 🔄 In Progress | DevOps | Docker/watchdog integration |
 | COM-124 | QA: Self-Healing System Testing | 🔄 In Progress | QA Engineer | Test plan, E2E tests |
+| COM-166 | QA: Alerting System Testing (COM-103) | 🔄 In Progress | QA Engineer | COM-103 alerting system QA |
+| COM-165 | [TASK] QA escalation - no tasks | ✅ Resolved | CTO Manager | Assigned QA to COM-166 |
 
 **Backend Tests Fixed (2026-04-05):** Fixed `app.address is not a function` errors in `server.test.js` and `dashboard.test.js` - changed `require('./server')` to `const { app } = require('./server')` to properly destructure the Express app from module exports. All 472 tests now passing.
 
