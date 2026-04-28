@@ -1,11 +1,12 @@
 # AIEmployee.vn Agent Marketplace — Landing Page Copy
 
-**Version:** 1.0
-**Date:** 2026-04-11
-**Status:** Draft
+**Version:** 1.1
+**Date:** 2026-04-28
+**Status:** Ready for Review
 **Author:** Content Creator (23d19d3f)
 **Reference:** Brand Voice Guide (docs/BRAND-VOICE-GUIDE.md)
 **Parent Task:** COM-15
+**Reviewer:** CMO Manager
 
 ---
 
@@ -20,10 +21,10 @@
 ## Hero Section
 
 **Headline:**
-> Build Your AI Team. Scale Without Limits.
+> Your AI Team Is Ready. Grow Without Hiring.
 
 **Subheadline:**
-> Browse a curated marketplace of AI agents tailored for Vietnamese businesses. Hire in minutes. Deploy instantly. Grow without hiring overhead.
+> AIEmployee.vn lets Vietnamese businesses deploy pre-built AI agents in minutes — for marketing, sales, operations, and support. No recruiting. No training. No overhead.
 
 **CTA Primary:** Explore AI Agents
 **CTA Secondary:** Watch Demo
@@ -34,10 +35,10 @@
 
 ### Marketing Agents
 
-**Headline:** Your Marketing Team, Multiplied
+**Headline:** Your Marketing Team, Running Around the Clock
 
 **Body:**
-Deploy AI agents that run your campaigns, analyze performance, and generate content — while your team focuses on strategy and relationships.
+AI agents that run your campaigns, analyze performance, and generate content — while your team focuses on strategy and customer relationships.
 
 **Featured Agents:**
 - **Content Creator AI** — Generates blog posts, social copy, and email sequences aligned with your brand voice
@@ -48,10 +49,10 @@ Deploy AI agents that run your campaigns, analyze performance, and generate cont
 
 ### Sales Agents
 
-**Headline:** Never Miss a Sales Opportunity
+**Headline:** Every Lead Gets a Response. Every Time.
 
 **Body:**
-AI agents that qualify leads, follow up instantly, and nurture prospects around the clock — so your sales team closes more deals.
+AI agents that qualify leads, follow up instantly, and nurture prospects around the clock — so your sales team focuses on closing deals that matter.
 
 **Featured Agents:**
 - **Lead Qualification AI** — Scores and qualifies leads based on your criteria, 24/7 response time
@@ -65,7 +66,7 @@ AI agents that qualify leads, follow up instantly, and nurture prospects around 
 **Headline:** Run Operations While You Sleep
 
 **Body:**
-Automate invoice processing, inventory management, and scheduling. Reduce manual work by 80% without changing your systems.
+Automate invoice processing, inventory management, and scheduling. Reduce manual work by 80% without changing your existing systems.
 
 **Featured Agents:**
 - **Invoice Processing AI** — Reads, extracts, and enters invoice data automatically
@@ -90,7 +91,7 @@ AI agents that answer FAQs, resolve common issues, and escalate complex cases �
 
 ### Finance & Compliance Agents
 
-**Headline:** Stay Compliant, Stay Focused
+**Headline:** Stay Compliant. Stay Focused.
 
 **Body:**
 Built for Vietnamese tax regulations and financial workflows. AI agents that keep your books accurate and your filings on time.
@@ -276,7 +277,8 @@ A: Agents flag uncertainty and escalate to your team when confidence is low. All
 | Version | Date | Author | Changes |
 |---------|------|--------|---------|
 | 1.0 | 2026-04-11 | Content Creator | Initial draft — COM-180 |
+| 1.1 | 2026-04-28 | Content Creator | Refined copy per COM-187: stronger headlines, brand voice alignment, Phase 14 messaging |
 
 ---
 
-*Draft — pending CMO Manager review and approval*
+*Ready for CMO Manager review and approval*
