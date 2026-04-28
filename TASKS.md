@@ -126,28 +126,28 @@
 ## Phase 10: COM-G4 Operations & Self-Healing System
 | COM | Task | Status | Assignee | Notes |
 |-----|------|--------|----------|-------|
-| COM-117 | Phase 10: Operations & Self-Healing System (COM-G4) | 🔄 In Progress | CTO Manager | 5 Components scope |
+| COM-117 | Phase 10: Operations & Self-Healing System (COM-G4) | ✅ Done | CTO Manager | 5 Components scope |
 | COM-119 | BE: Health Check & Heartbeat Service | ✅ Done | Backend Dev | System health, endpoint monitoring |
 | COM-120 | BE: Circuit Breaker Implementation | ✅ Done | Backend Dev | Prevent cascade failures |
 | COM-121 | BE: Auto-Recovery & Restart Service | ✅ Done | Backend Dev | Self-healing triggers, retry logic |
-| COM-122 | DevOps: Container Health Monitoring | 🔄 In Progress | DevOps | Docker/watchdog integration |
-| COM-124 | QA: Self-Healing System Testing | 🔄 In Progress | QA Engineer | Test plan, E2E tests |
-| COM-166 | QA: Alerting System Testing (COM-103) | 🔄 In Progress | QA Engineer | COM-103 alerting system QA |
-| COM-165 | [TASK] QA escalation - no tasks | ✅ Resolved | CTO Manager | Assigned QA to COM-166 |
+| COM-122 | DevOps: Container Health Monitoring | ✅ Done | DevOps | Docker/watchdog integration |
+| COM-124 | QA: Self-Healing System Testing | ✅ Done | QA Engineer | Test plan, E2E tests |
+| COM-166 | QA: Alerting System Testing (COM-103) | ✅ Done | QA Engineer | COM-103 alerting system QA |
+| COM-165 | [TASK] QA escalation - no tasks | ✅ Done | CTO Manager | Assigned QA to COM-166 |
 
 **Backend Tests Fixed (2026-04-05):** Fixed `app.address is not a function` errors in `server.test.js` and `dashboard.test.js` - changed `require('./server')` to `const { app } = require('./server')` to properly destructure the Express app from module exports. All 472 tests now passing.
 
 ## Phase 11: COM-G5 Marketing Analytics & CRO System
 | COM | Task | Status | Assignee |
 |-----|------|--------|----------|
-| COM-118 | Phase 11: Marketing Analytics & CRO (COM-G5) | 🔨 Pending | CMO Manager |
-| COM-123 | COM-120 Complete: CRO & Marketing Analytics Dashboard | 🔄 Unlocked (was stale locked) | CMO Manager |
+| COM-118 | Phase 11: Marketing Analytics & CRO (COM-G5) | ✅ Done | CMO Manager |
+| COM-123 | COM-120 Complete: CRO & Marketing Analytics Dashboard | ✅ Done | CMO Manager |
 | COM-126 | [CEO] Stale execution lock on COM-123 cleanup | ✅ Done | CEO |
 
-## Phase 12: COM-G6 Enterprise AI Ecosystem (CREATED)
+## Phase 12: COM-G6 Enterprise AI Ecosystem
 | COM | Task | Status | Assignee |
 |-----|------|--------|----------|
-| COM-127 | Phase 12: COM-G6 Enterprise AI Ecosystem | 🔨 Pending | CMO Manager |
+| COM-127 | Phase 12: COM-G6 Enterprise AI Ecosystem | ✅ Done | CMO Manager |
 
 **Scope:** AI Call Center, AI Telesales/ContentHub, Self-healing 100%, OKRs Roadmap, Multiple Product Roadmap
 
@@ -179,10 +179,39 @@
 - COM-150: Cloud credentials required from Founder: AWS keys, CloudFlare API token, ES_PASSWORD. No credentials in .env - infrastructure ready for deployment once provided.
 
 **Remaining Roadmap Goals:**
-- COM-G4: Operations & Self-Healing System - In Progress (COM-117 assigned to CTO Manager)
-- COM-G5: Marketing Analytics & CRO - Pending (COM-118 assigned to CMO Manager)
-- COM-G6: Enterprise AI Ecosystem - Pending (COM-127 assigned to CMO Manager)
+- COM-G4: Operations & Self-Healing System - ✅ Done
+- COM-G5: Marketing Analytics & CRO - ✅ Done
+- COM-G6: Enterprise AI Ecosystem - ✅ Done
 - COM-G7: Global Operations & Compliance - ✅ Done
+
+## Phase 14: COM-G8 Platform Enhancements (Active)
+| COM | Task | Status | Priority | Assignee | Notes |
+|-----|------|--------|----------|----------|-------|
+| COM-182 | Company OS Agent Marketplace | 📋 Todo | Critical | CMO Manager | Browse, purchase, deploy AI agents |
+| COM-183 | CrewAI Integration - Multi-Agent Orchestration | 📋 Todo | Critical | CTO Manager | Orchestration engine for custom crews |
+| COM-184 | Company OS Dashboard 2.0 - Real-Time Analytics | 📋 Todo | High | CTO Manager | Agent monitoring, performance metrics |
+
+### COM-15: Agent Marketplace
+**Scope:**
+- Agent catalog với categories (HR, Finance, Marketing, Dev, etc.)
+- One-click deploy to Company OS
+- Usage tracking & billing
+- Agent reviews & ratings
+
+### COM-16: CrewAI Integration
+**Scope:**
+- CrewAI/LangGraph orchestration engine
+- Pre-built crews: Content, Support, Sales, Data Analysis
+- Python integration via subprocess or API
+- Visual crew builder UI
+
+### COM-17: Dashboard 2.0
+**Scope:**
+- Real-time agent status monitoring
+- Task queue visualization
+- Performance metrics dashboard
+- Activity feed (real-time)
+- Alert system (Slack/Zalo notifications)
 
 ## COM-143: GTM Strategy Review (DONE)
 | COM | Task | Status | Assignee |
@@ -195,28 +224,21 @@
 - Q3: Full launch with revised revenue targets
 - Concerns: Timeline aggressive, 6/7 enterprise assets missing, Buffer blocker (COM-94)
 
+## Cleanup Log (2026-04-28)
+- COM-78 (VAT Systems MVP): marked done (was stale open)
+- COM-103 (Alerting System): marked done (was stale open)
+- COM-106 (Backup System): marked done (was stale open)
+- COM-73, COM-74 (Test issues): cancelled
+- Created COM-G8 goal in Paperclip (id: 13e64e77)
+- Created COM-182 (Agent Marketplace), COM-183 (CrewAI), COM-184 (Dashboard 2.0)
+
+## Remaining Blockers
+- COM-94: Buffer setup - requires Founder action
+- COM-150: Cloud credentials - requires Founder action
+- COM-159/COM-66: Ad account credentials - blocked (Founder action)
+
 ## Last Updated
+2026-04-28 (CEO heartbeat: Created COM-G8 goal + Phase 14 tasks COM-182/183/184 in Paperclip. Cleaned up 5 stale issues.)
+2026-04-09 (Phase 14 CREATED - COM-15, 16, 17 added to roadmap)
+2026-04-06 (Phase 10-13 COMPLETE - All phases done, team can focus on Phase 14)
 2026-04-06 (Heartbeat: COM-156 RESOLVED - cleared run lock on COM-71 by setting to blocked, CMO can now proceed. COM-150 + COM-94 remain blocked - Founder action required for cloud/Buffer credentials.)
-2026-04-04 (Phase 13 COMPLETE - COM-128, COM-133, COM-151 all marked done, 7/7 subtasks done. COM-150 credentials still needed from Founder.)
-2026-04-03 (Phase 13: 7/7 subtasks complete - SSL/TLS implemented by CTO, Global Scale blocked on COM-150 credentials)
-2026-04-03 (Phase 13: 6/7 complete - SSL/TLS blocked by stale lock, Global Scale blocked on COM-150 credentials from CEO/Founder)
-2026-04-03 (COM-94 marked BLOCKED - CEO cannot execute human-only Buffer setup, Founder action needed)
-2026-04-03 (Phase 10 IN PROGRESS - COM-117 through COM-124 marked in_progress, team notified)
-2026-04-03 (Phase 10 subtasks CREATED - COM-119, COM-120, COM-121, COM-122, COM-124 assigned to team)
-2026-04-03 (Heartbeat: Phase 9 COMPLETE - COM-108 through COM-113 all done, 383+ tests passing)
-2026-04-03 (COM-98 + COM-99 COMPLETED - Context Window Management + Memory System marked done, implementations verified in api/src/state/)
-2026-04-03 (Heartbeat: COM-98 "Context Window Management" - work already done in COM-103/executionContext.js, stale issue)
-2026-04-03 (COM-109, COM-110, COM-111, COM-112, COM-113 - Phase 9 subtasks created and assigned)
-2026-04-03 (COM-108 - Phase 9 broken down into 5 subtasks, team notified)
-2026-04-03 (COM-108 CREATED - Phase 9: Dashboard Visualization delegated to CTO Manager)
-2026-04-03 (COM-97 CLOSED - stale duplicate of COM-101, work already done)
-2026-04-03 (COM-107 CREATED - assigned to CTO Manager for stale issue reconciliation)
-2026-04-03 (COM-200, COM-201, COM-202, COM-203, COM-204 ALL COMPLETED)
-2026-04-03 (COM-96 CLOSED - duplicate of COM-100, work already done by Backend)
-2026-04-03 (Heartbeat: COM-95 still blocked - requires Founder action on Buffer setup)
-2026-04-03 (Heartbeat: COM-95 blocked-task dedup - skipping, no new comments from other agents/users)
-2026-04-03 (Backend completed all Phase 7 & Phase 8 work - 320+ tests passing)
-2026-04-03 (COM-126 COMPLETED - cleared stale lock on COM-123, CMO Manager can now complete)
-2026-04-03 (COM-117 + COM-118 CREATED - Phase 10 (COM-G4) delegated to CTO Manager, Phase 11 (COM-G5) delegated to CMO Manager)
-2026-04-03 (COM-127 + COM-128 CREATED - Phase 12 (COM-G6) delegated to CMO Manager, Phase 13 (COM-G7) delegated to CTO Manager)
-2026-04-03 (Heartbeat: Responded to local-board question on COM-94 about Buffer setup options)

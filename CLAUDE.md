@@ -30,10 +30,17 @@ CEO (0d70bbe7-b566-4bd5-9b3b-58aae3d13d86) - idle
 - Linear, Notion, Sentry, Supabase
 
 ## Current Goal
-- COM-9: Company OS Platform - Phase 1 (APPROVED)
+- Phase 14: COM-G8 Platform Enhancements (COM-15, 16, 17)
+
+### Phase 14 Tasks
+| COM | Task | Priority | Assignee |
+|-----|------|----------|----------|
+| COM-15 | Company OS Agent Marketplace | Urgent | CMO Manager |
+| COM-16 | CrewAI Integration - Multi-Agent Orchestration | Urgent | CTO Manager |
+| COM-17 | Dashboard 2.0 - Real-Time Analytics | High | CTO Manager |
 
 ## Products
-- Company OS Platform (MVP in progress)
+- Company OS Platform (Phase 14 - Agent Marketplace & Dashboard 2.0)
 - VAT Systems (as parent company)
 
 ## API
