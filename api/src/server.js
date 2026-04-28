@@ -1,13 +1,49 @@
 const express = require('express');
+const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
 const apiRoutes = require('./routes/api');
+const dashboardRoutes = require('./routes/dashboard');
 const { ApiSecurityService, InputSanitizer } = require('./services/apiSecurity');
 const { LoggingService, accessLogMiddleware } = require('./services/logging');
+const { RealTimeService } = require('./services/realTime');
+const { AgentLifecycleManager } = require('./state/agentManager');
+const { TaskQueueManager } = require('./state/taskQueue');
 const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Create HTTP server for WebSocket support
+const server = http.createServer(app);
+
+// Initialize Real-Time Service (WebSocket/SSE)
+const realTimeService = new RealTimeService(server, {
+  cors: {
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+      'https://aiemployee.vn',
+      'https://www.aiemployee.vn',
+      'http://localhost:8080',
+      'http://localhost:3000',
+      'null'
+    ],
+    methods: ['GET', 'POST']
+  }
+});
+
+// Initialize Agent Lifecycle Manager
+const agentManager = new AgentLifecycleManager({
+  healthCheckInterval: 60000
+});
+
+// Initialize Task Queue Manager (global for dashboard access)
+const taskQueueManager = new TaskQueueManager({
+  maxConcurrent: 5
+});
+
+// Global references for dashboard routes
+global.agentManager = agentManager;
+global.taskQueueManager = taskQueueManager;
 
 // Initialize logging service with ELK integration
 const loggingService = new LoggingService({
@@ -130,8 +166,19 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
+// Register real-time event listeners
+realTimeService.registerAgentManager(agentManager);
+realTimeService.registerTaskQueue(taskQueueManager);
+
+// Initialize dashboard routes with real-time service
+dashboardRoutes.initialize({
+  realTimeService,
+  dashboardAnalytics: null // Will be set if dashboard analytics is available
+});
+
 // Routes
 app.use('/api', apiRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -139,7 +186,8 @@ app.get('/health', (req, res) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     services: {
-      logging: loggingService.getStatus()
+      logging: loggingService.getStatus(),
+      realTime: realTimeService.getStatus()
     }
   });
 });
@@ -186,6 +234,7 @@ app.use((err, req, res, next) => {
 // Graceful shutdown handler
 const gracefulShutdown = async () => {
   console.log('Shutting down gracefully...');
+  realTimeService.shutdown();
   await loggingService.shutdown();
   process.exit(0);
 };
@@ -195,10 +244,14 @@ process.on('SIGINT', gracefulShutdown);
 
 // Only start server if running directly (not imported for testing)
 if (require.main === module) {
-  app.listen(PORT, () => {
+  // Initialize WebSocket server
+  realTimeService.initialize();
+
+  server.listen(PORT, () => {
     console.log(`AIEmployee API server running on port ${PORT}`);
     console.log(`Logging to ELK: ${loggingService.getStatus().elasticsearch.enabled}`);
+    console.log(`Real-time service: ${realTimeService.getStatus().status}`);
   });
 }
 
-module.exports = { app, loggingService, apiSecurity };
+module.exports = { app, server, loggingService, apiSecurity, realTimeService, agentManager, taskQueueManager };
