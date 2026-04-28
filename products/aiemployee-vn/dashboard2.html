@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard 2.0 | AIEmployee.vn</title>
+    <link rel="canonical" href="https://aiemployee.vn/dashboard2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/recharts@2.10.3/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #3b82f6;
+            --secondary: #10b981;
+            --secondary-dark: #059669;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --dark: #1e293b;
+            --darker: #0f172a;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --white: #ffffff;
+            --sidebar-width: 260px;
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --transition-fast: 150ms ease;
+            --transition-base: 200ms ease;
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 1rem;
+            color: var(--dark);
+            line-height: 1.6;
+            background: var(--gray-50);
+            min-height: 100vh;
+        }
+        .dash2-layout { display: flex; min-height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed; top: 0; left: 0;
+            width: var(--sidebar-width); height: 100vh;
+            background: var(--white); border-right: 1px solid var(--gray-200);
+            display: flex; flex-direction: column; z-index: 100;
+        }
+        .sidebar-logo { padding: 1.5rem; border-bottom: 1px solid var(--gray-200); }
+        .sidebar-logo a { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+        .sidebar-nav { flex: 1; padding: 1rem; overflow-y: auto; }
+        .nav-section { margin-bottom: 1.5rem; }
+        .nav-section-title {
+            font-size: 0.75rem; font-weight: 600; color: var(--gray-400);
+            text-transform: uppercase; letter-spacing: 0.05em;
+            padding: 0.5rem 0.75rem; margin-bottom: 0.25rem;
+        }
+        .nav-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; border-radius: var(--radius-md);
+            color: var(--gray-500); font-size: 0.875rem; font-weight: 500;
+            transition: all var(--transition-fast); cursor: pointer;
+        }
+        .nav-item:hover { background: var(--gray-50); color: var(--dark); }
+        .nav-item.active { background: var(--primary); color: var(--white); }
+        .nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+        .sidebar-footer { padding: 1rem; border-top: 1px solid var(--gray-200); }
+
+        /* Main Content */
+        .main-content { margin-left: var(--sidebar-width); flex: 1; padding: 1.5rem; }
+
+        /* Header */
+        .dash-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .dash-header h1 { font-size: 1.75rem; font-weight: 700; color: var(--darker); }
+        .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+        .live-badge {
+            display: flex; align-items: center; gap: 0.5rem;
+            background: #dcfce7; color: #166534;
+            padding: 0.375rem 0.75rem; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 600;
+        }
+        .live-dot { width: 8px; height: 8px; background: var(--secondary); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--white); border-radius: var(--radius-lg); padding: 1.25rem;
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem; }
+        .stat-card-title { font-size: 0.875rem; font-weight: 500; color: var(--gray-500); }
+        .stat-card-icon {
+            width: 40px; height: 40px; border-radius: var(--radius-md);
+            display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
+        }
+        .stat-card-value { font-size: 2rem; font-weight: 700; color: var(--darker); }
+        .stat-card-change { font-size: 0.75rem; margin-top: 0.25rem; }
+        .stat-card-change.up { color: var(--secondary); }
+        .stat-card-change.down { color: var(--danger); }
+
+        /* Grid Layout */
+        .dash-grid {
+            display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;
+        }
+        .dash-col { display: flex; flex-direction: column; gap: 1.5rem; }
+
+        /* Panel */
+        .panel {
+            background: var(--white); border-radius: var(--radius-lg);
+            padding: 1.25rem; box-shadow: var(--shadow-sm);
+        }
+        .panel-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 1rem; padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        .panel-title { font-size: 1rem; font-weight: 600; color: var(--dark); }
+        .panel-badge {
+            background: var(--gray-100); color: var(--gray-600);
+            padding: 0.25rem 0.625rem; border-radius: 9999px;
+            font-size: 0.75rem; font-weight: 500;
+        }
+
+        /* Agent Status Grid */
+        .agent-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem;
+        }
+        .agent-card {
+            border: 1px solid var(--gray-200); border-radius: var(--radius-md);
+            padding: 0.875rem; transition: all var(--transition-fast);
+        }
+        .agent-card:hover { border-color: var(--primary-light); box-shadow: var(--shadow-md); }
+        .agent-card-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.625rem; }
+        .agent-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem; flex-shrink: 0;
+        }
+        .agent-info { flex: 1; min-width: 0; }
+        .agent-name { font-size: 0.875rem; font-weight: 600; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .agent-role { font-size: 0.75rem; color: var(--gray-500); }
+        .agent-status {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+        }
+        .agent-status.idle { background: var(--gray-400); }
+        .agent-status.running { background: var(--secondary); animation: pulse 2s infinite; }
+        .agent-status.blocked { background: var(--danger); }
+        .agent-metrics { display: flex; gap: 0.75rem; margin-top: 0.5rem; }
+        .agent-metric { font-size: 0.75rem; color: var(--gray-500); }
+        .agent-metric span { font-weight: 600; color: var(--dark); }
+
+        /* Task Queue */
+        .task-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .task-item {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.75rem; background: var(--gray-50); border-radius: var(--radius-md);
+            cursor: grab; transition: all var(--transition-fast);
+        }
+        .task-item:hover { background: var(--gray-100); }
+        .task-item.dragging { opacity: 0.5; box-shadow: var(--shadow-lg); }
+        .task-drag { color: var(--gray-300); font-size: 1rem; cursor: grab; }
+        .task-priority {
+            width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+        }
+        .task-priority.high { background: var(--danger); }
+        .task-priority.medium { background: var(--warning); }
+        .task-priority.low { background: var(--gray-400); }
+        .task-info { flex: 1; min-width: 0; }
+        .task-title { font-size: 0.875rem; font-weight: 500; color: var(--dark); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .task-meta { font-size: 0.75rem; color: var(--gray-500); margin-top: 0.125rem; }
+        .task-agent { display: flex; align-items: center; gap: 0.375rem; }
+        .task-agent-avatar { width: 20px; height: 20px; border-radius: 50%; font-size: 0.625rem; display: flex; align-items: center; justify-content: center; }
+
+        /* Performance Chart */
+        .chart-container { height: 220px; }
+
+        /* Activity Feed */
+        .activity-feed { max-height: 350px; overflow-y: auto; }
+        .activity-item {
+            display: flex; gap: 0.75rem; padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-icon {
+            width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.875rem; flex-shrink: 0;
+        }
+        .activity-content { flex: 1; }
+        .activity-text { font-size: 0.875rem; color: var(--dark); }
+        .activity-text strong { font-weight: 600; }
+        .activity-time { font-size: 0.75rem; color: var(--gray-400); margin-top: 0.125rem; }
+        .activity-new { animation: flashBg 1s ease; }
+        @keyframes flashBg { 0% { background: #eff6ff; } 100% { background: transparent; } }
+
+        /* Alert Toast */
+        .toast-container {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            display: flex; flex-direction: column; gap: 0.75rem; z-index: 1000;
+        }
+        .toast {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.875rem 1.25rem; border-radius: var(--radius-lg);
+            background: var(--darker); color: var(--white);
+            box-shadow: var(--shadow-lg); font-size: 0.875rem;
+            font-weight: 500; min-width: 280px; max-width: 400px;
+            animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .toast.critical { border-left: 4px solid var(--danger); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        .toast.success { border-left: 4px solid var(--secondary); }
+        .toast-icon { font-size: 1.125rem; flex-shrink: 0; }
+        .toast-close { margin-left: auto; cursor: pointer; opacity: 0.7; }
+        .toast-close:hover { opacity: 1; }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem; border-radius: var(--radius-md);
+            font-size: 0.875rem; font-weight: 600; cursor: pointer;
+            transition: all var(--transition-fast); border: none;
+        }
+        .btn-primary { background: var(--primary); color: var(--white); }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-outline {
+            background: transparent; border: 1px solid var(--gray-200);
+            color: var(--gray-600);
+        }
+        .btn-outline:hover { background: var(--gray-50); }
+
+        /* Realtime indicator */
+        .realtime-bar {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.5rem 1rem; background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            font-size: 0.75rem; color: var(--gray-500);
+        }
+        .realtime-bar .pulse {
+            width: 6px; height: 6px; background: var(--secondary);
+            border-radius: 50%; animation: pulse 1.5s infinite;
+        }
+
+        @media (max-width: 1200px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .dash-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; }
+            .stats-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ========================================
+        // Mock Data
+        // ========================================
+        const mockAgents = [
+            { id: 'ceo', name: 'CEO Agent', role: 'Strategy', avatar: '👔', status: 'idle', tasksDone: 0, efficiency: 0 },
+            { id: 'cto', name: 'CTO Manager', role: 'Technology', avatar: '🧠', status: 'running', tasksDone: 47, efficiency: 94 },
+            { id: 'frontend', name: 'Frontend Developer', role: 'UI/UX', avatar: '🎨', status: 'running', tasksDone: 23, efficiency: 91 },
+            { id: 'backend', name: 'Backend Developer', role: 'API', avatar: '⚙️', status: 'running', tasksDone: 31, efficiency: 88 },
+            { id: 'devops', name: 'DevOps Engineer', role: 'Infrastructure', avatar: '🔧', status: 'idle', tasksDone: 19, efficiency: 85 },
+            { id: 'qa', name: 'QA Engineer', role: 'Testing', avatar: '🧪', status: 'running', tasksDone: 28, efficiency: 92 },
+            { id: 'coo', name: 'COO Manager', role: 'Operations', avatar: '📋', status: 'idle', tasksDone: 15, efficiency: 79 },
+            { id: 'data', name: 'Data Analyst', role: 'Analytics', avatar: '📊', status: 'running', tasksDone: 22, efficiency: 90 },
+            { id: 'hr', name: 'HR/Admin', role: 'Human Resources', avatar: '👥', status: 'idle', tasksDone: 12, efficiency: 82 },
+            { id: 'support', name: 'Customer Support', role: 'Support', avatar: '🎧', status: 'blocked', tasksDone: 8, efficiency: 65 },
+            { id: 'cmo', name: 'CMO Manager', role: 'Marketing', avatar: '📢', status: 'idle', tasksDone: 18, efficiency: 87 },
+            { id: 'content', name: 'Content Creator', role: 'Marketing', avatar: '✍️', status: 'running', tasksDone: 35, efficiency: 93 },
+        ];
+
+        const mockTasks = [
+            { id: 1, title: 'Build Dashboard 2.0 components', priority: 'high', agent: 'frontend', status: 'in_progress', eta: '2h' },
+            { id: 2, title: 'Integrate CrewAI orchestration engine', priority: 'high', agent: 'backend', status: 'in_progress', eta: '4h' },
+            { id: 3, title: 'Deploy agent marketplace to staging', priority: 'medium', agent: 'devops', status: 'todo', eta: '1h' },
+            { id: 4, title: 'Write E2E tests for crew builder', priority: 'medium', agent: 'qa', status: 'in_progress', eta: '3h' },
+            { id: 5, title: 'Analyze beta user engagement data', priority: 'low', agent: 'data', status: 'todo', eta: '5h' },
+            { id: 6, title: 'Create marketing copy for launch', priority: 'medium', agent: 'content', status: 'in_progress', eta: '2h' },
+            { id: 7, title: 'Fix CSS issue on mobile nav', priority: 'high', agent: 'frontend', status: 'blocked', eta: '30m' },
+        ];
+
+        const activityLog = [
+            { agent: 'frontend', action: 'completed', target: 'Crew Builder UI', time: '2m ago', icon: '✅' },
+            { agent: 'backend', action: 'deployed', target: 'API v2.3 to production', time: '5m ago', icon: '🚀' },
+            { agent: 'qa', action: 'found', target: '3 bugs in test run', time: '8m ago', icon: '🐛' },
+            { agent: 'devops', action: 'scaled', target: 'Auto-scaled to 3 instances', time: '12m ago', icon: '📈' },
+            { agent: 'data', action: 'generated', target: 'Weekly report ready', time: '15m ago', icon: '📊' },
+            { agent: 'cto', action: 'approved', target: 'COM-186 crew builder', time: '18m ago', icon: '👍' },
+        ];
+
+        // ========================================
+        // Components
+        // ========================================
+
+        // Stat Card
+        function StatCard({ title, value, change, icon, color }) {
+            return (
+                <div className="stat-card">
+                    <div className="stat-card-header">
+                        <span className="stat-card-title">{title}</span>
+                        <div className="stat-card-icon" style={{ background: color + '20', color: color }}>{icon}</div>
+                    </div>
+                    <div className="stat-card-value">{value}</div>
+                    <div className={`stat-card-change ${change >= 0 ? 'up' : 'down'}`}>
+                        {change >= 0 ? '↑' : '↓'} {Math.abs(change)}% vs last week
+                    </div>
+                </div>
+            );
+        }
+
+        // Agent Status Grid
+        function AgentStatusGrid({ agents }) {
+            const statusCounts = { running: 0, idle: 0, blocked: 0 };
+            agents.forEach(a => { statusCounts[a.status] = (statusCounts[a.status] || 0) + 1; });
+
+            return (
+                <div className="panel">
+                    <div className="panel-header">
+                        <span className="panel-title">Agent Status</span>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                            <span className="panel-badge" style={{ color: '#166534', background: '#dcfce7' }}>{statusCounts.running} running</span>
+                            <span className="panel-badge">{statusCounts.idle} idle</span>
+                            {statusCounts.blocked > 0 && <span className="panel-badge" style={{ color: '#991b1b', background: '#fee2e2' }}>{statusCounts.blocked} blocked</span>}
+                        </div>
+                    </div>
+                    <div className="agent-grid">
+                        {agents.map(agent => (
+                            <div key={agent.id} className="agent-card">
+                                <div className="agent-card-header">
+                                    <div className="agent-avatar" style={{ background: '#f1f5f9' }}>{agent.avatar}</div>
+                                    <div className="agent-info">
+                                        <div className="agent-name">{agent.name}</div>
+                                        <div className="agent-role">{agent.role}</div>
+                                    </div>
+                                    <div className={`agent-status ${agent.status}`}></div>
+                                </div>
+                                <div className="agent-metrics">
+                                    <div className="agent-metric"><span>{agent.tasksDone}</span> tasks</div>
+                                    <div className="agent-metric"><span>{agent.efficiency}%</span> eff.</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Task Queue
+        function TaskQueue({ tasks }) {
+            return (
+                <div className="panel">
+                    <div className="panel-header">
+                        <span className="panel-title">Task Queue</span>
+                        <span className="panel-badge">{tasks.length} tasks</span>
+                    </div>
+                    <div className="task-list">
+                        {tasks.map(task => {
+                            const agent = mockAgents.find(a => a.id === task.agent);
+                            return (
+                                <div key={task.id} className="task-item" draggable>
+                                    <span className="task-drag">⋮⋮</span>
+                                    <div className={`task-priority ${task.priority}`}></div>
+                                    <div className="task-info">
+                                        <div className="task-title">{task.title}</div>
+                                        <div className="task-meta">{task.status} · ETA: {task.eta}</div>
+                                    </div>
+                                    <div className="task-agent">
+                                        <div className="task-agent-avatar" style={{ background: '#f1f5f9' }}>{agent?.avatar || '❓'}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        }
+
+        // Performance Chart
+        function PerformanceChart() {
+            const data = [
+                { time: '00:00', agents: 3, tasks: 12 },
+                { time: '04:00', agents: 2, tasks: 8 },
+                { time: '08:00', agents: 8, tasks: 45 },
+                { time: '12:00', agents: 10, tasks: 67 },
+                { time: '16:00', agents: 9, tasks: 52 },
+                { time: '20:00', agents: 6, tasks: 38 },
+            ];
+
+            return (
+                <div className="panel">
+                    <div className="panel-header">
+                        <span className="panel-title">Performance (24h)</span>
+                    </div>
+                    <div className="chart-container">
+                        <Recharts.LineChart width={500} height={200} data={data}>
+                            <Recharts.CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <Recharts.XAxis dataKey="time" tick={{ fontSize: 12, fill: '#64748b' }} />
+                            <Recharts.YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                            <Recharts.Tooltip />
+                            <Recharts.Line type="monotone" dataKey="agents" stroke="#2563eb" strokeWidth={2} dot={{ r: 4 }} name="Active Agents" />
+                            <Recharts.Line type="monotone" dataKey="tasks" stroke="#10b981" strokeWidth={2} dot={{ r: 4 }} name="Tasks Completed" />
+                        </Recharts.LineChart>
+                    </div>
+                </div>
+            );
+        }
+
+        // Bar Chart - Task Distribution
+        function TaskDistribution() {
+            const data = [
+                { dept: 'Tech', tasks: 45 },
+                { dept: 'Marketing', tasks: 28 },
+                { dept: 'Operations', tasks: 18 },
+                { dept: 'Support', tasks: 12 },
+            ];
+
+            return (
+                <div className="panel">
+                    <div className="panel-header">
+                        <span className="panel-title">Task Distribution</span>
+                    </div>
+                    <div className="chart-container">
+                        <Recharts.BarChart width={300} height={200} data={data}>
+                            <Recharts.CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                            <Recharts.XAxis dataKey="dept" tick={{ fontSize: 12, fill: '#64748b' }} />
+                            <Recharts.YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                            <Recharts.Tooltip />
+                            <Recharts.Bar dataKey="tasks" fill="#2563eb" radius={[4, 4, 0, 0]} name="Tasks" />
+                        </Recharts.BarChart>
+                    </div>
+                </div>
+            );
+        }
+
+        // Activity Feed
+        function ActivityFeed({ activities }) {
+            return (
+                <div className="panel">
+                    <div className="panel-header">
+                        <span className="panel-title">Activity Feed</span>
+                        <span className="panel-badge">Live</span>
+                    </div>
+                    <div className="activity-feed">
+                        {activities.map((act, i) => (
+                            <div key={i} className={`activity-item ${i === 0 ? 'activity-new' : ''}`}>
+                                <div className="activity-icon" style={{ background: '#f1f5f9' }}>{act.icon}</div>
+                                <div className="activity-content">
+                                    <div className="activity-text">
+                                        <strong>{act.agent}</strong> {act.action} {act.target}
+                                    </div>
+                                    <div className="activity-time">{act.time}</div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // Toast Notification
+        function Toast({ message, type, onClose }) {
+            const icons = { critical: '🚨', warning: '⚠️', success: '✅' };
+            useEffect(() => {
+                const timer = setTimeout(onClose, 5000);
+                return () => clearTimeout(timer);
+            }, [onClose]);
+
+            return (
+                <div className={`toast ${type}`}>
+                    <span className="toast-icon">{icons[type]}</span>
+                    <span>{message}</span>
+                    <span className="toast-close" onClick={onClose}>×</span>
+                </div>
+            );
+        }
+
+        // ========================================
+        // Main App
+        // ========================================
+        function Dashboard2App() {
+            const [agents, setAgents] = useState(mockAgents);
+            const [tasks] = useState(mockTasks);
+            const [activities, setActivities] = useState(activityLog);
+            const [toasts, setToasts] = useState([]);
+            const [stats, setStats] = useState({ agentsActive: 7, tasksCompleted: 156, efficiency: 87, alerts: 2 });
+
+            // Simulate real-time updates
+            useEffect(() => {
+                const interval = setInterval(() => {
+                    // Randomly update an agent's status
+                    setAgents(prev => {
+                        const updated = [...prev];
+                        const idx = Math.floor(Math.random() * updated.length);
+                        const statuses = ['idle', 'running', 'blocked'];
+                        updated[idx] = { ...updated[idx], status: statuses[Math.floor(Math.random() * statuses.length)], efficiency: Math.max(60, Math.min(99, updated[idx].efficiency + (Math.random() > 0.5 ? 1 : -1))) };
+                        return updated;
+                    });
+
+                    // Add new activity
+                    const newActivities = [
+                        { agent: 'frontend', action: 'pushed', target: 'commit to main', time: 'just now', icon: '📤' },
+                        { agent: 'system', action: 'triggered', target: 'health check passed', time: 'just now', icon: '💚' },
+                        { agent: 'data', action: 'exported', target: 'CSV report', time: 'just now', icon: '📁' },
+                    ];
+                    setActivities(prev => [newActivities[Math.floor(Math.random() * newActivities.length)], ...prev.slice(0, 5)]);
+
+                    // Random toast
+                    if (Math.random() > 0.7) {
+                        const toastTypes = ['success', 'warning', 'critical'];
+                        const messages = [
+                            { type: 'success', msg: 'Task #45 completed by Frontend Dev' },
+                            { type: 'warning', msg: 'CPU usage above 80% on server-2' },
+                            { type: 'critical', msg: 'Agent Support is blocked - needs action' },
+                        ];
+                        const toast = messages[Math.floor(Math.random() * messages.length)];
+                        setToasts(prev => [...prev, { id: Date.now(), ...toast }]);
+                    }
+                }, 8000);
+
+                return () => clearInterval(interval);
+            }, []);
+
+            const removeToast = (id) => setToasts(prev => prev.filter(t => t.id !== id));
+
+            return (
+                <div className="dash2-layout">
+                    {/* Sidebar */}
+                    <aside className="sidebar">
+                        <div className="sidebar-logo">
+                            <a href="/">AIEmployee<span>.vn</span></a>
+                        </div>
+                        <nav className="sidebar-nav">
+                            <div className="nav-section">
+                                <div className="nav-section-title">Dashboard</div>
+                                <div className="nav-item active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                                    Overview
+                                </div>
+                                <div className="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                                    Analytics
+                                </div>
+                            </div>
+                            <div className="nav-section">
+                                <div className="nav-section-title">AI Agents</div>
+                                <div className="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    Team
+                                </div>
+                                <div className="nav-item" onClick={() => location.href='/crew-builder'}>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                    Crew Builder
+                                </div>
+                            </div>
+                            <div className="nav-section">
+                                <div className="nav-section-title">Settings</div>
+                                <div className="nav-item">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    Settings
+                                </div>
+                            </div>
+                        </nav>
+                        <div className="sidebar-footer">
+                            <div className="nav-item">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                                Help
+                            </div>
+                        </div>
+                    </aside>
+
+                    {/* Main Content */}
+                    <main className="main-content">
+                        {/* Realtime Bar */}
+                        <div className="realtime-bar">
+                            <span className="pulse"></span>
+                            <span>Real-time updates active · Last sync: just now</span>
+                        </div>
+
+                        {/* Header */}
+                        <div className="dash-header">
+                            <div>
+                                <h1>Dashboard 2.0</h1>
+                            </div>
+                            <div className="header-actions">
+                                <div className="live-badge">
+                                    <span className="live-dot"></span>
+                                    LIVE
+                                </div>
+                                <button className="btn btn-outline">Export Report</button>
+                                <button className="btn btn-primary">Alerts (2)</button>
+                            </div>
+                        </div>
+
+                        {/* Stats Row */}
+                        <div className="stats-row">
+                            <StatCard title="Active Agents" value={stats.agentsActive} change={14} icon="👥" color="#2563eb" />
+                            <StatCard title="Tasks Completed" value={stats.tasksCompleted} change={23} icon="✅" color="#10b981" />
+                            <StatCard title="Avg Efficiency" value={stats.efficiency + '%'} change={5} icon="📈" color="#8b5cf6" />
+                            <StatCard title="Active Alerts" value={stats.alerts} change={-50} icon="🚨" color="#ef4444" />
+                        </div>
+
+                        {/* Grid Layout */}
+                        <div className="dash-grid">
+                            <div className="dash-col">
+                                <AgentStatusGrid agents={agents} />
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                    <PerformanceChart />
+                                    <TaskDistribution />
+                                </div>
+                                <TaskQueue tasks={tasks} />
+                            </div>
+                            <div className="dash-col">
+                                <ActivityFeed activities={activities} />
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Toasts */}
+                    <div id="toast-container" className="toast-container">
+                        {toasts.map(toast => (
+                            <Toast
+                                key={toast.id}
+                                message={toast.msg}
+                                type={toast.type}
+                                onClose={() => removeToast(toast.id)}
+                            />
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<Dashboard2App />);
+    </script>
+</body>
+</html>
