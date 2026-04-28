@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const apiRoutes = require('./routes/api');
 const dashboardRoutes = require('./routes/dashboard');
+const crewAIRoutes = require('./routes/crewAI');
 const { ApiSecurityService, InputSanitizer } = require('./services/apiSecurity');
 const { LoggingService, accessLogMiddleware } = require('./services/logging');
 const { RealTimeService } = require('./services/realTime');
@@ -179,6 +180,7 @@ dashboardRoutes.initialize({
 // Routes
 app.use('/api', apiRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/crewai', crewAIRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

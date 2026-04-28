@@ -13,6 +13,7 @@ services:
       - PORT=3000
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - LOG_LEVEL=info
+      - CREW_SERVICE_URL=http://crewai:8000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/health"]
@@ -22,6 +23,28 @@ services:
       start_period: 20s
     depends_on:
       - elasticsearch
+      - crewai
+    networks:
+      - elk
+
+  # CrewAI Multi-Agent Orchestration Service
+  crewai:
+    build:
+      context: ./crew-service
+      dockerfile: Dockerfile
+    container_name: company-os-crewai
+    ports:
+      - "8000:8000"
+    environment:
+      - CREW_SERVICE_PORT=8000
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     networks:
       - elk
 
