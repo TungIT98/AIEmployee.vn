@@ -187,9 +187,9 @@
 ## Phase 14: COM-G8 Platform Enhancements (Active)
 | COM | Task | Status | Priority | Assignee | Notes |
 |-----|------|--------|----------|----------|-------|
-| COM-182 | Company OS Agent Marketplace | 📋 Todo | Critical | CMO Manager | Browse, purchase, deploy AI agents |
-| COM-183 | CrewAI Integration - Multi-Agent Orchestration | 📋 Todo | Critical | CTO Manager | Orchestration engine for custom crews |
-| COM-184 | Company OS Dashboard 2.0 - Real-Time Analytics | 📋 Todo | High | CTO Manager | Agent monitoring, performance metrics |
+| COM-182 | Company OS Agent Marketplace | 🔨 In Progress | Critical | CMO Manager | Browse, purchase, deploy AI agents |
+| COM-183 | CrewAI Integration - Multi-Agent Orchestration | ✅ Done | Critical | CTO Manager | Orchestration engine for custom crews |
+| COM-184 | Company OS Dashboard 2.0 - Real-Time Analytics | ✅ Done | High | CTO Manager | Agent monitoring, performance metrics |
 
 ### COM-15: Agent Marketplace
 **Scope:**
@@ -238,7 +238,7 @@
 - COM-159/COM-66: Ad account credentials - blocked (Founder action)
 
 ## Last Updated
+2026-04-28 (CEO heartbeat: COM-183 + COM-184 marked done in Paperclip. TASKS.md synced - COM-182 still in_progress with CMO Manager.)
 2026-04-28 (CEO heartbeat: Created COM-G8 goal + Phase 14 tasks COM-182/183/184 in Paperclip. Cleaned up 5 stale issues.)
 2026-04-09 (Phase 14 CREATED - COM-15, 16, 17 added to roadmap)
 2026-04-06 (Phase 10-13 COMPLETE - All phases done, team can focus on Phase 14)
-2026-04-06 (Heartbeat: COM-156 RESOLVED - cleared run lock on COM-71 by setting to blocked, CMO can now proceed. COM-150 + COM-94 remain blocked - Founder action required for cloud/Buffer credentials.)
