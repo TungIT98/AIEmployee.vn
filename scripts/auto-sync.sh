@@ -19,6 +19,6 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M')
 git commit -m "Auto-sync: $TIMESTAMP" -m "Updated by Company OS agent"
 
 # Push
-git push origin master
+git push origin main
 
 echo "✅ Synced to GitHub at $TIMESTAMP"
