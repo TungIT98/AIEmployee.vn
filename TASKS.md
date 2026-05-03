@@ -187,7 +187,7 @@
 ## Phase 14: COM-G8 Platform Enhancements (Active)
 | COM | Task | Status | Priority | Assignee | Notes |
 |-----|------|--------|----------|----------|-------|
-| COM-182 | Company OS Agent Marketplace | 🚫 Blocked | Critical | CMO Manager | CMO workstream done; CTO workstream pending unblock |
+| COM-182 | Company OS Agent Marketplace | 🔨 In Progress | Critical | CMO Manager | CMO workstream done; CTO workstream pending |
 | COM-183 | CrewAI Integration - Multi-Agent Orchestration | ✅ Done | Critical | CTO Manager | Orchestration engine for custom crews |
 | COM-184 | Company OS Dashboard 2.0 - Real-Time Analytics | ✅ Done | High | CTO Manager | Agent monitoring, performance metrics |
 
