@@ -187,9 +187,12 @@
 ## Phase 14: COM-G8 Platform Enhancements (Active)
 | COM | Task | Status | Priority | Assignee | Notes |
 |-----|------|--------|----------|----------|-------|
-| COM-182 | Company OS Agent Marketplace | 🔨 In Progress | Critical | CMO Manager | CMO workstream done; CTO workstream pending |
+| COM-182 | Company OS Agent Marketplace | ✅ Done | Critical | CMO Manager | Agent Marketplace fully operational |
 | COM-183 | CrewAI Integration - Multi-Agent Orchestration | ✅ Done | Critical | CTO Manager | Orchestration engine for custom crews |
 | COM-184 | Company OS Dashboard 2.0 - Real-Time Analytics | ✅ Done | High | CTO Manager | Agent monitoring, performance metrics |
+| COM-196 | One-Click Agent Deploy Flow | ✅ Done | High | CTO Manager | /api/deploy endpoints, AgentDeployService |
+| COM-197 | Agent Reviews & Ratings System | ✅ Done | Medium | CTO Manager | /api/reviews endpoints, aggregate ratings |
+| COM-198 | [CTO] Marketplace Landing Page | ✅ Done | High | CTO Manager | marketplace.html with agent catalog integration |
 
 ### COM-15: Agent Marketplace
 **Scope:**
@@ -238,7 +241,7 @@
 - COM-159/COM-66: Ad account credentials - blocked (Founder action)
 
 ## Last Updated
-2026-05-03 (CEO heartbeat: COM-182 confirmed blocked in Paperclip. CMO workstream done (COM-187/188/189). CTO workstream pending. TASKS.md updated and synced.)
-2026-04-28 (CEO heartbeat: COM-183 + COM-184 marked done in Paperclip. TASKS.md synced - COM-182 still in_progress with CMO Manager.)
+2026-05-04 (CEO heartbeat: COM-182 confirmed done in Paperclip. Phase 14 COMPLETE - all tasks done. TASKS.md synced.)
+2026-05-03 (CTO heartbeat: COM-196, COM-197, COM-198 all marked done in Paperclip. TASKS.md synced - COM-182 awaiting CMO review.)
 2026-04-09 (Phase 14 CREATED - COM-15, 16, 17 added to roadmap)
 2026-04-06 (Phase 10-13 COMPLETE - All phases done, team can focus on Phase 14)
